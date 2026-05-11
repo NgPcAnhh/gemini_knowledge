@@ -1,0 +1,268 @@
+<div class="header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+    <div>
+        <h1 class="page-title" style="margin-bottom: 4px;">Chi phí & Rủi ro</h1>
+        <div style="font-size: 11px; color: var(--text-muted);">
+            <i class="fa-solid fa-clock-rotate-left"></i> Cập nhật lúc: <span id="last-update-time">14:35 -
+                11/05/2026</span>
+        </div>
+    </div>
+
+    <div class="controls-bar" style="margin-bottom: 0; padding: 4px 12px;">
+        <div class="filter-group">
+            <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">XEM THEO:</span>
+            <div class="feed-tabs-container" style="margin-bottom: 0; background: rgba(255,255,255,0.05);">
+                <button class="feed-tab"
+                    onclick="this.parentElement.querySelectorAll('.feed-tab').forEach(b=>b.classList.remove('active')); this.classList.add('active')">Tuần</button>
+                <button class="feed-tab active"
+                    onclick="this.parentElement.querySelectorAll('.feed-tab').forEach(b=>b.classList.remove('active')); this.classList.add('active')">Tháng</button>
+                <button class="feed-tab"
+                    onclick="this.parentElement.querySelectorAll('.feed-tab').forEach(b=>b.classList.remove('active')); this.classList.add('active')">Quý</button>
+            </div>
+        </div>
+        <div class="filter-group" style="border-left: 1px solid var(--border); padding-left: 12px; margin-left: 4px;">
+            <button class="btn-refresh" style="box-shadow: none;" onclick="refreshData(this)">
+                <i class="fa-solid fa-rotate"></i> Làm mới
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Node for Tab 3 -->
+<div class="floating-filter-btn" data-panel="filter-panel-risk">
+    <i class="fa-solid fa-filter"></i>
+</div>
+<div class="filter-overlay" id="overlay-risk" onclick="toggleCardFilter('filter-panel-risk')">
+    <div class="card-filter-panel" id="filter-panel-risk" onclick="event.stopPropagation()">
+        <div class="filter-label">Bộ lọc Rủi ro</div>
+        <select class="filter-select">
+            <option>Tất cả khu vực</option>
+            <option>Hà Nội</option>
+            <option>TP. Hồ Chí Minh</option>
+        </select>
+        <div style="display:flex; flex-direction:column; gap:5px;">
+            <span style="font-size:10px; color:var(--text-muted)">Thời gian</span>
+            <input type="date" class="filter-date" value="2026-05-01">
+            <input type="date" class="filter-date" value="2026-05-10">
+        </div>
+        <select class="filter-select">
+            <option>Phân khúc: App Driver</option>
+            <option>Phân khúc: Sinh viên</option>
+        </select>
+        <div class="filter-footer">
+            <button class="btn-refresh" onclick="refreshData(this); toggleCardFilter('filter-panel-risk')">Áp
+                dụng</button>
+        </div>
+    </div>
+</div>
+
+<div class="grid-8-stats"
+    style="grid-template-columns: 1.25fr 1.25fr 1fr 1fr 1fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+    <!-- 1. PAR Ngắn hạn -->
+    <div class="stat-card yellow" title="Theo dõi nợ quá hạn từ 1-14 ngày. Cần nhắc nợ quyết liệt để tránh trôi nhóm.">
+        <div class="stat-info">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <span class="stat-title">PAR Ngắn hạn (1-14d)</span>
+                <span class="badge badge-warning">Cần chú ý</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 8px;">
+                <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                    <span style="color: var(--text-muted)">PAR 1+: <i class="fa-solid fa-circle-info"
+                            title="Tổng dư nợ quá hạn từ 1 ngày / Tổng dư nợ"></i></span>
+                    <span style="font-weight: 600; color: var(--f88-yellow)">4.5%</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                    <span style="color: var(--text-muted)">PAR 7+:</span>
+                    <span style="font-weight: 600; color: var(--f88-yellow)">2.1%</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                    <span style="color: var(--text-muted)">PAR 14+:</span>
+                    <span style="font-weight: 600; color: var(--f88-yellow)">1.2%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. PAR Dài hạn -->
+    <div class="stat-card red"
+        title="Dư nợ quá hạn trên 30 ngày. Điểm rơi nợ xấu nguy hiểm, ảnh hưởng trực tiếp lợi nhuận.">
+        <div class="stat-info">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <span class="stat-title">PAR Dài hạn (30-180d)</span>
+                <span class="badge badge-danger">Nguy hiểm</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 8px;">
+                <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                    <span style="color: var(--text-muted)">PAR 30+:</span>
+                    <span style="font-weight: 600; color: var(--danger)">2.1%</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                    <span style="color: var(--text-muted)">PAR 90+:</span>
+                    <span style="font-weight: 600; color: var(--danger)">1.4%</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                    <span style="color: var(--text-muted)">PAR 180+:</span>
+                    <span style="font-weight: 600; color: var(--danger)">0.8%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Write-off Rate -->
+    <div class="stat-card red" title="Tỷ lệ nợ không thể thu hồi phải xử lý xóa nợ.">
+        <div class="stat-info">
+            <span class="stat-title">Tỷ lệ Xóa nợ (Write-off)</span>
+            <div class="stat-value" style="color: var(--danger); font-size: 22px;">0.8%</div>
+            <span class="stat-trend trend-down" style="margin-top: auto;"><i class="fa-solid fa-arrow-down"></i> vs kỳ
+                trước: 0.9%</span>
+        </div>
+        <div class="stat-icon icon-red"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+    </div>
+
+    <!-- 4. Recovery Rate -->
+    <div class="stat-card" title="Hiệu quả thu hồi nợ đã xóa. Chỉ số càng cao càng tốt.">
+        <div class="stat-info">
+            <span class="stat-title">Tỷ lệ Thu hồi (Recovery)</span>
+            <div class="stat-value" style="color: var(--f88-green); font-size: 22px;">35.2%</div>
+            <span class="stat-trend trend-up" style="margin-top: auto;"><i class="fa-solid fa-arrow-up"></i> vs kỳ
+                trước: 32.1%</span>
+        </div>
+        <div class="stat-icon icon-green"><i class="fa-solid fa-arrow-rotate-left"></i></div>
+    </div>
+
+    <!-- 5. Provision Coverage Ratio -->
+    <div class="stat-card" title="Mức độ sẵn sàng tài chính để bao phủ nợ xấu hiện tại. Ngưỡng an toàn > 100%.">
+        <div class="stat-info">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <span class="stat-title">Bao phủ Dự phòng</span>
+                <span class="badge badge-success">Tốt</span>
+            </div>
+            <div class="stat-value" style="color: var(--f88-green); font-size: 22px;">120%</div>
+            <span class="stat-trend trend-up" style="margin-top: auto;"><i class="fa-solid fa-arrow-up"></i> vs kỳ
+                trước: 115%</span>
+        </div>
+        <div class="stat-icon icon-green"><i class="fa-solid fa-vault"></i></div>
+    </div>
+
+    <!-- 6. Roll Rate M1->M2 -->
+    <div class="stat-card yellow" title="Xác suất nợ nhóm 1 (1-30d) trôi sang nhóm 2 (31-90d). Cần kiểm soát chặt.">
+        <div class="stat-info">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <span class="stat-title">Chuyển nhóm M1→M2</span>
+                <span class="badge badge-warning">Chú ý</span>
+            </div>
+            <div class="stat-value" style="color: var(--f88-yellow); font-size: 22px;">15.8%</div>
+            <span class="stat-trend trend-warning" style="margin-top: auto;"><i class="fa-solid fa-minus"></i> vs kỳ
+                trước: 15.8%</span>
+        </div>
+        <div class="stat-icon icon-yellow"><i class="fa-solid fa-shuffle"></i></div>
+    </div>
+
+    <!-- 7. LTV Trung bình -->
+    <div class="stat-card" title="Tỷ lệ khoản vay trên giá trị tài sản đảm bảo. Duy trì < 70% để đảm bảo an toàn.">
+        <div class="stat-info">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <span class="stat-title">LTV Trung bình</span>
+                <span class="badge badge-success">Tốt</span>
+            </div>
+            <div class="stat-value" style="color: var(--f88-green); font-size: 22px;">62.4%</div>
+            <span class="stat-trend trend-up" style="margin-top: auto;"><i class="fa-solid fa-arrow-up"></i> vs kỳ
+                trước: 60.1%</span>
+        </div>
+        <div class="stat-icon icon-green"><i class="fa-solid fa-scale-balanced"></i></div>
+    </div>
+
+    <!-- 8. Concentration Risk Top 10 -->
+    <div class="stat-card red" title="Tỷ trọng dư nợ của 10 khách hàng lớn nhất. > 20% là rủi ro cao.">
+        <div class="stat-info">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <span class="stat-title">Rủi ro Tập trung</span>
+                <span class="badge badge-success">Tốt</span>
+            </div>
+            <div class="stat-value" style="color: var(--danger); font-size: 22px;">18.2%</div>
+            <span class="stat-trend trend-down" style="margin-top: auto;"><i class="fa-solid fa-arrow-down"></i> vs kỳ
+                trước: 19.5%</span>
+        </div>
+        <div class="stat-icon icon-red"><i class="fa-solid fa-bullseye"></i></div>
+    </div>
+</div>
+
+<!-- Tầng 2: Charts chính (2 cột) -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; flex: 1;">
+    <div class="chart-card">
+        <div class="chart-title">
+            Phân tích Vintage (Xu hướng Nợ quá hạn)
+            <span class="badge badge-danger" style="animation: pulse-red 2s infinite;">Cảnh báo: T2 tăng nhanh</span>
+        </div>
+        <div class="chart-container"><canvas id="vintageLineChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+        <div class="chart-title">
+            Ma trận Roll Rate (Chuyển dịch nợ M0 → M3)
+            <div style="font-size: 10px; font-weight: normal; color: var(--text-muted);">
+                <span
+                    style="display: inline-block; width: 8px; height: 8px; background: rgba(239,68,68,0.5); border-radius: 2px;"></span>
+                Nguy hiểm (>20%)
+            </div>
+        </div>
+        <div class="chart-container" id="rollRateContainer" style="display: block; text-align: left;">
+            <!-- Matrix will be rendered via JS as a styled table -->
+        </div>
+    </div>
+</div>
+
+<!-- Tầng 3: Phân tích chi tiết (3 cột) -->
+<div class="risk-bottom-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; flex: 0.7; margin-bottom: 12px;">
+    <div class="chart-card">
+        <div class="chart-title">Nợ xấu theo Quận (vs Trung bình 5.2%)</div>
+        <div class="chart-container"><canvas id="riskHBarChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+        <div class="chart-title">Cấu trúc Rủi ro</div>
+        <div class="chart-container"><canvas id="riskTypePie"></canvas></div>
+    </div>
+    <div class="chart-card">
+        <div class="chart-title">Phân tán LTV vs Thu Nhập</div>
+        <div class="chart-container" style="position: relative;">
+            <canvas id="riskBubbleChart"></canvas>
+            <!-- Quadrant Labels -->
+            <div
+                style="position: absolute; top: 30px; left: 40px; font-size: 9px; color: var(--danger); font-weight: 700; opacity: 0.6; pointer-events: none;">
+                RỦI RO CAO</div>
+            <div
+                style="position: absolute; top: 30px; right: 10px; font-size: 9px; color: var(--f88-yellow); font-weight: 700; opacity: 0.6; pointer-events: none;">
+                CẦN THEO DÕI</div>
+            <div
+                style="position: absolute; bottom: 30px; left: 40px; font-size: 9px; color: var(--text-muted); font-weight: 700; opacity: 0.6; pointer-events: none;">
+                THU NHẬP THẤP</div>
+            <div
+                style="position: absolute; bottom: 30px; right: 10px; font-size: 9px; color: var(--f88-green); font-weight: 700; opacity: 0.6; pointer-events: none;">
+                VÙNG AN TOÀN</div>
+        </div>
+        <div style="font-size: 9px; color: var(--text-muted); text-align: center; margin-top: 4px;">X: Thu nhập (K VNĐ),
+            Y: LTV (%)</div>
+    </div>
+</div>
+
+
+
+    @keyframes pulse-red {
+        0% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.05); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+
+    @media (max-width: 1400px) {
+        .risk-bottom-grid { 
+            grid-template-columns: 1fr !important; 
+            flex: none !important;
+            height: auto !important;
+        }
+        .risk-bottom-grid .chart-card {
+            height: 250px;
+        }
+    }
+
+    .risk-bottom-grid .chart-container {
+        height: 180px; /* Force smaller height */
+    }
+</style>

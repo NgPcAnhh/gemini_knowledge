@@ -1,0 +1,25 @@
+/* Main Content */
+.main-content { flex: 1; display: flex; flex-direction: column; padding: 16px 24px; height: 100vh; overflow: hidden; transition: all 0.3s ease; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-shrink: 0; }
+.page-title { font-size: 20px; font-weight: 600; }
+
+/* Compact Stats Grid */
+.grid-4-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px; flex-shrink: 0; }
+.grid-8-stats { 
+    display: grid; 
+    grid-template-columns: repeat(8, 1fr); 
+    gap: 8px; 
+    margin-bottom: 12px; 
+    flex-shrink: 0; 
+}
+
+/* Chart Grids */
+.chart-grid-t1 { display: grid; grid-template-columns: 1.6fr 1.4fr 1.1fr; grid-template-rows: 1fr; gap: 12px; flex: 1; min-height: 0; }
+.chart-grid-t2 { display: grid; grid-template-columns: 1fr 1.5fr 1fr; grid-template-rows: 1fr; gap: 12px; flex: 1; min-height: 0; }
+.chart-grid-t3 { display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 12px; flex: 1; min-height: 0; }
+.chart-grid-t4 { display: grid; grid-template-columns: 1.5fr 1fr 1fr; grid-template-rows: 1fr; gap: 12px; flex: 1; min-height: 0; }
+
+/* Tabs */
+.tab-pane { display: none; flex-direction: column; flex: 1; height: 100%; min-height: 0; animation: fadeIn 0.3s ease-out; }
+.tab-pane.active { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }

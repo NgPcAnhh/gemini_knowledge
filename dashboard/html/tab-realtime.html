@@ -1,0 +1,103 @@
+            <div class="header">
+                <h1 class="page-title"><span class="pulse-text"></span>Tổng quan Real-time</h1>
+            </div>
+
+            <!-- Stats with Quick Actions & Thresholds -->
+            <div class="grid-4-stats">
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <span class="stat-title">Giải ngân hôm nay</span>
+                        <div class="stat-value">185.4M <span class="stat-trend trend-up">+12%</span></div>
+                        <div class="threshold-bar"><div class="threshold-fill bg-success" style="width: 75%"></div></div>
+                        <a href="#" class="quick-action"><i class="fa-solid fa-magnifying-glass"></i> Xem chi tiết HĐ</a>
+                    </div>
+                    <div class="stat-icon icon-green"><i class="fa-solid fa-money-bill-wave"></i></div>
+                </div>
+                <div class="stat-card yellow">
+                    <div class="stat-info">
+                        <span class="stat-title">Tổng thu hôm nay</span>
+                        <div class="stat-value" style="color: var(--f88-yellow)">142.1M <span class="stat-trend trend-down">-5%</span></div>
+                        <div class="threshold-bar"><div class="threshold-fill bg-warning" style="width: 60%"></div></div>
+                        <a href="#" class="quick-action"><i class="fa-solid fa-bell"></i> SMS nhắc nợ tới hạn</a>
+                    </div>
+                    <div class="stat-icon icon-yellow"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+                </div>
+                <div class="stat-card red">
+                    <div class="stat-info">
+                        <span class="stat-title">Net Cashflow</span>
+                        <div class="stat-value" style="color: var(--danger)">-43.3M <span class="stat-trend trend-warning"><i class="fa-solid fa-triangle-exclamation"></i>Âm</span></div>
+                        <div class="threshold-bar"><div class="threshold-fill bg-danger" style="width: 90%"></div></div>
+                        <a href="#" class="quick-action"><i class="fa-solid fa-sliders"></i> Tạm dừng giải ngân</a>
+                    </div>
+                    <div class="stat-icon icon-red"><i class="fa-solid fa-wallet"></i></div>
+                </div>
+                <div class="stat-card red">
+                    <div class="stat-info">
+                        <span class="stat-title">Tỷ lệ PAR 1+ (Live)</span>
+                        <div class="stat-value">8.2% <span class="stat-trend trend-down">+1.2%</span></div>
+                        <div class="threshold-bar"><div class="threshold-fill bg-danger" style="width: 82%"></div></div>
+                        <a href="#" class="quick-action"><i class="fa-solid fa-file-export"></i> Xuất file DPD1</a>
+                    </div>
+                    <div class="stat-icon icon-red"><i class="fa-solid fa-chart-pie"></i></div>
+                </div>
+            </div>
+
+            <!-- Charts Grid: Map Left, Line Middle, Feed Right -->
+            <div class="chart-grid-t1">
+                <!-- Bản đồ Việt Nam -->
+                <div class="chart-card" style="position: relative;">
+                    <div class="chart-title">Cảnh báo Thời tiết Địa lý <i class="fa-solid fa-map-location-dot" style="color: var(--f88-green)"></i></div>
+                    <div id="vnMap"></div>
+                    <div class="map-legend-leaflet">
+                        <div class="legend-item"><div class="legend-color" style="background:#00a651"></div>Bình thường</div>
+                        <div class="legend-item"><div class="legend-color" style="background:#ffc20e"></div>Rủi ro thấp</div>
+                        <div class="legend-item"><div class="legend-color" style="background:#ef4444"></div>Hụt thu cao</div>
+                    </div>
+                </div>
+
+                <!-- Middle Column: Stacked Charts -->
+                <div style="display: flex; flex-direction: column; gap: 12px; min-height: 0;">
+                    <!-- Top Chart: 2 in 1 (Tròn & Cột đôi) -->
+                    <div class="chart-card" style="flex: 1; display: flex; flex-direction: column; padding-bottom: 4px;">
+                        <div class="chart-title" style="margin-bottom: 4px;">Phê duyệt & Cấu trúc Sản phẩm (Live)</div>
+                        <div style="display: flex; flex: 1; gap: 0; min-height: 0;">
+                            <div class="chart-container" style="flex: 1; border-right: 1px solid rgba(255,255,255,0.05); padding-right: 8px;"><canvas id="dailyStatusBar"></canvas></div>
+                            <div class="chart-container" style="flex: 1; padding-left: 8px;"><canvas id="customerProductDoughnut"></canvas></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Line Chart -->
+                    <div class="chart-card" style="flex: 1.2;">
+                        <div class="chart-title">Lưu lượng Giải ngân / Thu (Theo giờ)</div>
+                        <div class="chart-container"><canvas id="realtimeLineChart"></canvas></div>
+                    </div>
+                </div>
+                
+                <!-- Feed & Radar -->
+                <div style="display: flex; flex-direction: column; gap: 12px; min-height: 0;">
+                    <div class="chart-card" style="flex: 1;">
+                        <div class="chart-title">Chỉ số Rủi ro</div>
+                        <div class="chart-container"><canvas id="riskRadarChart"></canvas></div>
+                    </div>
+                    <div class="chart-card" style="flex: 1.5; padding: 12px 12px 0 12px;">
+                        <div class="chart-title" style="margin-bottom: 4px;">Live Event Stream</div>
+                        <div class="feed-tabs-container">
+                            <button class="feed-tab active" onclick="filterFeed('all', this)">Tất cả</button>
+                            <button class="feed-tab" onclick="filterFeed('alert', this)">Cảnh báo</button>
+                            <button class="feed-tab" onclick="filterFeed('txn', this)">Giao dịch</button>
+                            <button class="feed-tab" onclick="filterFeed('weather', this)">Thời tiết</button>
+                        </div>
+                        <ul class="feed-list" id="feedList">
+                            <li class="feed-item" data-type="weather"><div class="feed-time">10:50</div><div class="feed-content"><div class="feed-title"><span class="badge badge-danger">BÃO</span> Cảnh báo mưa giông</div>TP.HCM: Mưa 45mm/h, gió 40km/h. 384 HĐ bị ảnh hưởng.</div></li>
+                            <li class="feed-item" data-type="weather"><div class="feed-time">10:45</div><div class="feed-content"><div class="feed-title"><span class="badge badge-warning">MƯA</span> Mưa vừa Q.Bình Thạnh</div>Lượng mưa 18mm. Ước tính hụt thu 22%.</div></li>
+                            <li class="feed-item" data-type="alert"><div class="feed-time">10:45</div><div class="feed-content"><div class="feed-title"><span class="badge badge-warning">CẢNH BÁO</span> Income Shock cao</div>Shock Score 76/100 tại Bình Thạnh, Gò Vấp.</div></li>
+                            <li class="feed-item" data-type="txn"><div class="feed-time">10:42</div><div class="feed-content"><div class="feed-title"><span class="badge badge-success">GIẢI NGÂN</span> LC-000123</div>4.5M - KH Nguyễn Văn Nam</div></li>
+                            <li class="feed-item" data-type="alert"><div class="feed-time">10:30</div><div class="feed-content"><div class="feed-title"><span class="badge badge-danger">QUÁ HẠN</span> DPD1 Tăng</div>42 khoản chuyển sang DPD1.</div></li>
+                            <li class="feed-item" data-type="weather"><div class="feed-time">10:20</div><div class="feed-content"><div class="feed-title"><span class="badge badge-warning">MƯA</span> Đà Nẵng mưa rải rác</div>Lượng mưa 8mm. Ảnh hưởng nhẹ 120 HĐ.</div></li>
+                            <li class="feed-item" data-type="txn"><div class="feed-time">10:15</div><div class="feed-content"><div class="feed-title"><span class="badge badge-success">THU TIỀN</span> LC-000088</div>+330,000 VND</div></li>
+                            <li class="feed-item" data-type="alert"><div class="feed-time">10:00</div><div class="feed-content"><div class="feed-title"><span class="badge badge-warning">RỦI RO</span> Override</div>NV duyệt ngoại lệ LTV > 60%.</div></li>
+                            <li class="feed-item" data-type="weather"><div class="feed-time">09:30</div><div class="feed-content"><div class="feed-title"><span class="badge badge-success">NẮNG</span> Hà Nội trời nắng</div>Nhiệt độ 32°C. Điều kiện lý tưởng cho tài xế.</div></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>

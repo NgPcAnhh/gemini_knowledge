@@ -1,0 +1,161 @@
+            <div class="header">
+    <h1 class="page-title">Chân dung Khách hàng</h1>
+</div>
+
+<!-- Floating Node for Tab 4 -->
+<div class="floating-filter-btn" data-panel="filter-panel-customer">
+    <i class="fa-solid fa-filter"></i>
+</div>
+<div class="filter-overlay" id="overlay-customer" onclick="toggleCardFilter('filter-panel-customer')">
+    <div class="card-filter-panel" id="filter-panel-customer" onclick="event.stopPropagation()">
+        <div class="filter-label">Bộ lọc Chân dung KH</div>
+        <select class="filter-select">
+            <option>Tất cả khu vực</option>
+            <option>Hà Nội</option>
+            <option>TP. Hồ Chí Minh</option>
+        </select>
+        <div style="display:flex; flex-direction:column; gap:5px;">
+            <input type="date" class="filter-date" value="2026-05-01">
+            <input type="date" class="filter-date" value="2026-05-10">
+        </div>
+        <div class="filter-footer">
+            <button class="btn-refresh" onclick="refreshData(this); toggleCardFilter('filter-panel-customer')">Áp dụng</button>
+        </div>
+    </div>
+</div>
+
+<!-- TẦNG 1 — Chân dung & Phân bổ chính -->
+<div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 12px; margin-bottom: 12px; flex: 1.2;">
+    <!-- Typical Customer Profile Component (Mind Map Style) -->
+    <div class="chart-card" style="background: linear-gradient(145deg, var(--surface), rgba(59, 130, 246, 0.05)); overflow: visible;">
+        <div class="chart-title">Chân dung Khách hàng Tiêu biểu</div>
+        <div class="chart-container" style="position: relative; height: 320px; display: flex; align-items: center; justify-content: center; margin-top: 10px;">
+            
+            <!-- Central Icon -->
+            <div style="width: 70px; height: 70px; background: var(--f88-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(59, 130, 246, 0.4); z-index: 10; border: 3px solid var(--surface);">
+                <i class="fa-solid fa-user-tie" style="font-size: 32px; color: #fff;"></i>
+            </div>
+
+            <!-- Radiating KPIs (8 Nodes) -->
+            <!-- 1. Top -->
+            <div class="mind-map-node" style="top: 0%; left: 50%; transform: translateX(-50%);">
+                <span class="node-label">KH Active</span>
+                <div class="node-value" style="color: var(--f88-green);">4,250</div>
+                <div class="node-line" style="height: 60px; width: 2px; bottom: -60px; left: 50%; transform: translateX(-50%); background: linear-gradient(to bottom, var(--f88-blue), transparent);"></div>
+            </div>
+
+            <!-- 2. Top Right -->
+            <div class="mind-map-node" style="top: 15%; right: 5%;">
+                <span class="node-label">Tỷ lệ Tái vay</span>
+                <div class="node-value" style="color: var(--f88-green);">65%</div>
+                <div class="node-line" style="width: 80px; height: 2px; bottom: -20px; left: -60px; transform: rotate(-145deg); background: linear-gradient(to right, transparent, var(--f88-blue));"></div>
+            </div>
+
+            <!-- 3. Mid Right -->
+            <div class="mind-map-node" style="top: 50%; right: -2%; transform: translateY(-50%);">
+                <span class="node-label">Credit Score</span>
+                <div class="node-value" style="color: var(--f88-green);">680</div>
+                <div class="node-line" style="width: 70px; height: 2px; left: -70px; top: 50%; background: linear-gradient(to right, transparent, var(--f88-blue));"></div>
+            </div>
+
+            <!-- 4. Bottom Right -->
+            <div class="mind-map-node" style="bottom: 15%; right: 5%;">
+                <span class="node-label">Độ tuổi TB</span>
+                <div class="node-value" style="color: var(--f88-blue);">31</div>
+                <div class="node-line" style="width: 80px; height: 2px; top: -20px; left: -60px; transform: rotate(145deg); background: linear-gradient(to right, transparent, var(--f88-blue));"></div>
+            </div>
+
+            <!-- 5. Bottom -->
+            <div class="mind-map-node" style="bottom: 0%; left: 50%; transform: translateX(-50%);">
+                <span class="node-label">Thời gian vay</span>
+                <div class="node-value">14th</div>
+                <div class="node-line" style="height: 60px; width: 2px; top: -60px; left: 50%; transform: translateX(-50%); background: linear-gradient(to top, var(--f88-blue), transparent);"></div>
+            </div>
+
+            <!-- 6. Bottom Left -->
+            <div class="mind-map-node" style="bottom: 15%; left: 5%;">
+                <span class="node-label">DTI (Gánh nặng)</span>
+                <div class="node-value" style="color: var(--danger);">48%</div>
+                <div class="node-line" style="width: 80px; height: 2px; top: -20px; right: -60px; transform: rotate(-145deg); background: linear-gradient(to left, transparent, var(--f88-blue));"></div>
+            </div>
+
+            <!-- 7. Mid Left -->
+            <div class="mind-map-node" style="top: 50%; left: -2%; transform: translateY(-50%);">
+                <span class="node-label">Thu nhập TB</span>
+                <div class="node-value" style="color: var(--f88-yellow);">520K</div>
+                <div class="node-line" style="width: 70px; height: 2px; right: -70px; top: 50%; background: linear-gradient(to left, transparent, var(--f88-blue));"></div>
+            </div>
+
+            <!-- 8. Top Left -->
+            <div class="mind-map-node" style="top: 15%; left: 5%;">
+                <span class="node-label">Tỷ lệ Churn</span>
+                <div class="node-value" style="color: var(--danger);">12%</div>
+                <div class="node-line" style="width: 80px; height: 2px; bottom: -20px; right: -60px; transform: rotate(145deg); background: linear-gradient(to left, transparent, var(--f88-blue));"></div>
+            </div>
+
+        </div>
+        <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; font-size: 11px;">
+            <div style="color: var(--f88-blue); font-weight: 700; margin-bottom: 4px;"><i class="fa-solid fa-lightbulb"></i> NHẬN ĐỊNH:</div>
+            <div style="display: flex; gap: 15px;">
+                <span style="flex: 1;"><i class="fa-solid fa-circle-check" style="color: var(--f88-green);"></i> Nam giới, 25-35t.</span>
+                <span style="flex: 1;"><i class="fa-solid fa-triangle-exclamation" style="color: var(--danger);"></i> DTI 48% (Rủi ro).</span>
+                <span style="flex: 1;"><i class="fa-solid fa-rotate" style="color: var(--f88-yellow);"></i> Tái vay 65%.</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="chart-card">
+        <div class="chart-title">Tuổi vs Thu nhập (Bubble, màu theo PAR)</div>
+        <div class="chart-container"><canvas id="ageIncomeBubblePAR"></canvas></div>
+    </div>
+</div>
+
+<!-- TẦNG 2 — 3 Charts phụ -->
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; flex: 1;">
+    <div class="chart-card">
+        <div class="chart-title">Phân bổ Thu nhập theo Nhóm Rủi ro</div>
+        <div class="chart-container"><canvas id="incomeRiskStackedBar"></canvas></div>
+    </div>
+    <div class="chart-card">
+        <div class="chart-title">Nghề nghiệp vs PAR Rate</div>
+        <div class="chart-container"><canvas id="jobPARHBar"></canvas></div>
+    </div>
+    <div class="chart-card">
+        <div class="chart-title">Phân bổ Credit Score</div>
+        <div class="chart-container"><canvas id="creditScoreHistogram"></canvas></div>
+    </div>
+</div>
+
+<style>
+.mind-map-node {
+    position: absolute;
+    background: rgba(255,255,255,0.05);
+    padding: 8px 15px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    min-width: 100px;
+    text-align: center;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 5;
+}
+.node-label {
+    display: block;
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+.node-value {
+    font-size: 16px;
+    font-weight: 700;
+}
+.node-line {
+    position: absolute;
+    height: 1px;
+    background: linear-gradient(90deg, var(--f88-blue), transparent);
+    z-index: 1;
+    pointer-events: none;
+}
+</style>
+

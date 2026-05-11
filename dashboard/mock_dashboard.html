@@ -1,0 +1,1182 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F88 - Dashboard Quản Trị</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --f88-green: #00a651;
+            --f88-green-glow: rgba(0, 166, 81, 0.4);
+            --f88-yellow: #ffc20e;
+            --f88-yellow-glow: rgba(255, 194, 14, 0.4);
+            --bg-dark: #0b0f19;
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-hover: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.05);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+            --danger-glow: rgba(239, 68, 68, 0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(0, 166, 81, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(255, 194, 14, 0.05) 0%, transparent 50%);
+        }
+
+        /* Sidebar */
+        .sidebar { width: 240px; background: rgba(11, 15, 25, 0.8); backdrop-filter: blur(20px); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px 0; z-index: 10; transition: width 0.3s ease; overflow: hidden; position: relative; }
+        .sidebar.collapsed { width: 60px; }
+        .sidebar.collapsed .logo-text, .sidebar.collapsed .nav-label, .sidebar.collapsed .sidebar-filters { display: none; }
+        .sidebar.collapsed .logo-container { justify-content: center; padding: 0 0 24px; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding: 12px; }
+        .sidebar.collapsed .nav-item i { margin: 0; }
+        .logo-container { padding: 0 20px 24px; display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--f88-green), var(--f88-yellow)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #111; font-size: 16px; box-shadow: 0 0 15px var(--f88-green-glow); flex-shrink: 0; }
+        .logo-text { font-size: 18px; font-weight: 700; letter-spacing: 1px; background: linear-gradient(to right, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; white-space: nowrap; }
+        .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 4px; padding: 0 12px; }
+        .nav-item { padding: 12px 16px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 12px; color: var(--text-muted); font-size: 14px; font-weight: 500; transition: all 0.2s ease; white-space: nowrap; }
+        .nav-item:hover { background: var(--surface-hover); color: var(--text-main); }
+        .nav-item.active { background: linear-gradient(90deg, rgba(0, 166, 81, 0.15) 0%, transparent 100%); color: var(--f88-green); border-left: 3px solid var(--f88-green); }
+        .nav-item i { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+        .sidebar-toggle-btn { margin-top: auto; padding: 15px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); transition: all 0.2s; }
+        .sidebar-toggle-btn:hover { color: var(--f88-green); background: var(--surface-hover); }
+        .sidebar.collapsed .sidebar-toggle-btn i { transform: rotate(180deg); }
+        
+        /* Floating Filter Node */
+        .floating-filter-btn { 
+            position: fixed; bottom: 30px; right: 30px; 
+            width: 50px; height: 50px; border-radius: 50%; 
+            background: linear-gradient(135deg, var(--f88-green), #008740);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 2000; box-shadow: 0 10px 25px var(--f88-green-glow);
+            border: 2px solid rgba(255,255,255,0.2);
+            user-select: none;
+            touch-action: none;
+        }
+        .floating-filter-btn:active { cursor: grabbing; }
+        .floating-filter-btn i { font-size: 20px; pointer-events: none; }
+
+        .filter-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+            z-index: 1999; display: none; align-items: center; justify-content: center;
+        }
+        .filter-overlay.active { display: flex; }
+
+        .card-filter-panel { 
+            background: rgba(11, 15, 25, 0.98); 
+            border: 1px solid var(--border); border-radius: 15px; padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8); backdrop-filter: blur(20px); 
+            display: flex; flex-direction: column; gap: 15px; width: 300px;
+            animation: modalScale 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes modalScale { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .filter-label { font-size: 12px; font-weight: 700; color: var(--f88-green); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .filter-footer { display: flex; gap: 10px; margin-top: 10px; }
+        .filter-footer button { flex: 1; padding: 10px; font-size: 13px; border-radius: 8px; }
+
+        /* Main Content */
+        .main-content { flex: 1; display: flex; flex-direction: column; padding: 16px 24px; height: 100vh; overflow: hidden; transition: all 0.3s ease; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-shrink: 0; }
+        .page-title { font-size: 20px; font-weight: 600; }
+
+        /* Controls */
+        .controls-bar { display: flex; gap: 12px; margin-bottom: 12px; align-items: center; background: var(--surface); padding: 8px 16px; border-radius: 12px; border: 1px solid var(--border); backdrop-filter: blur(10px); flex-shrink: 0; }
+        .filter-group { display: flex; align-items: center; gap: 8px; }
+        .filter-select, .filter-date { background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: var(--text-main); padding: 6px 12px; border-radius: 6px; outline: none; font-size: 12px; transition: border 0.3s; }
+        .filter-select:focus, .filter-date:focus { border-color: var(--f88-green); }
+        .btn-refresh { background: linear-gradient(135deg, var(--f88-green), #008740); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; margin-left: auto; box-shadow: 0 4px 10px var(--f88-green-glow); transition: all 0.2s; }
+        .btn-refresh:hover { transform: translateY(-1px); box-shadow: 0 6px 15px var(--f88-green-glow); }
+        .btn-refresh i { transition: transform 0.5s; }
+        .btn-refresh.spin i { transform: rotate(360deg); }
+
+        /* Compact Stats Grid */
+        .grid-4-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px; flex-shrink: 0; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 16px; display: flex; justify-content: space-between; align-items: flex-start; backdrop-filter: blur(10px); position: relative; overflow: hidden; }
+        .stat-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--f88-green); opacity: 0.5; }
+        .stat-card.yellow::before { background: var(--f88-yellow); }
+        .stat-card.red::before { background: var(--danger); }
+        .stat-info { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+        .stat-title { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-value { font-size: 20px; font-weight: 700; display: flex; align-items: baseline; gap: 6px; }
+        .stat-trend { font-size: 10px; display: flex; align-items: center; gap: 4px; }
+        .trend-up { color: var(--f88-green); }
+        .trend-down { color: var(--danger); }
+        .trend-warning { color: var(--f88-yellow); }
+        .stat-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .icon-green { background: rgba(0, 166, 81, 0.1); color: var(--f88-green); }
+        .icon-yellow { background: rgba(255, 194, 14, 0.1); color: var(--f88-yellow); }
+        .icon-red { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+
+        /* Threshold Bar & Quick Actions */
+        .threshold-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+        .threshold-fill { height: 100%; border-radius: 2px; }
+        .bg-danger { background: var(--danger); box-shadow: 0 0 5px var(--danger); }
+        .bg-warning { background: var(--f88-yellow); box-shadow: 0 0 5px var(--f88-yellow); }
+        .bg-success { background: var(--f88-green); box-shadow: 0 0 5px var(--f88-green); }
+        .quick-action { display: inline-block; font-size: 10px; color: var(--f88-yellow); text-decoration: none; margin-top: 6px; font-weight: 500; transition: color 0.2s; }
+        .quick-action:hover { color: #fff; text-decoration: underline; }
+
+        /* Chart Grids */
+        .chart-grid-t1 { display: grid; grid-template-columns: 1.6fr 1.4fr 1.1fr; grid-template-rows: 1fr; gap: 12px; flex: 1; min-height: 0; }
+        .chart-grid-t2 { display: grid; grid-template-columns: 1fr 1.5fr 1fr; grid-template-rows: 1fr; gap: 12px; flex: 1; min-height: 0; }
+        .chart-grid-t3 { display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 12px; flex: 1; min-height: 0; }
+        .chart-grid-t4 { display: grid; grid-template-columns: 1.5fr 1fr 1fr; grid-template-rows: 1fr; gap: 12px; flex: 1; min-height: 0; }
+
+        .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .chart-card.row-span-2 { grid-row: span 2; }
+        .chart-card.col-span-2 { grid-column: span 2; }
+        .chart-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; flex-shrink: 0; color: var(--text-main); display: flex; justify-content: space-between; align-items: center;}
+        .chart-container { flex: 1; position: relative; min-height: 0; width: 100%; }
+
+        /* Leaflet Map */
+        #vnMap { width: 100%; height: 100%; border-radius: 8px; background: #1a1f2e; z-index: 1; }
+        .leaflet-container { background: #1a1f2e !important; }
+        .leaflet-tile-pane { filter: brightness(0.85) saturate(0.6); }
+        .leaflet-marker-pane, .leaflet-overlay-pane { filter: none !important; }
+        .leaflet-control-attribution { display: none !important; }
+        .leaflet-control-zoom a { background: rgba(26,31,46,0.9) !important; color: var(--text-main) !important; border-color: var(--border) !important; }
+        .map-legend-leaflet { position: absolute; bottom: 8px; right: 8px; background: rgba(11,15,25,0.9); padding: 8px 10px; border-radius: 8px; font-size: 10px; border: 1px solid var(--border); z-index: 1000; backdrop-filter: blur(5px); }
+        .legend-item { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+        .legend-item:last-child { margin-bottom: 0; }
+        .legend-color { width: 8px; height: 8px; border-radius: 2px; }
+        .leaflet-tooltip-custom { background: rgba(11,15,25,0.95) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: #f1f5f9 !important; font-family: 'Inter', sans-serif !important; font-size: 11px !important; border-radius: 8px !important; padding: 8px 12px !important; box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important; }
+        .leaflet-tooltip-custom::before { border-right-color: rgba(11,15,25,0.95) !important; }
+
+        /* Real-time Feed with Tabs */
+        .feed-tabs-container { display: flex; gap: 4px; margin-bottom: 8px; background: rgba(0,0,0,0.2); padding: 2px; border-radius: 6px; flex-shrink: 0;}
+        .feed-tab { flex: 1; background: transparent; border: none; color: var(--text-muted); font-size: 10px; font-weight: 600; padding: 4px 0; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+        .feed-tab.active { background: var(--surface-hover); color: var(--text-main); }
+        .feed-list { list-style: none; overflow-y: auto; flex: 1; padding-right: 4px; }
+        .feed-list::-webkit-scrollbar { width: 3px; }
+        .feed-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        .feed-item { padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; gap: 8px; font-size: 11px; animation: fadeIn 0.3s; }
+        .feed-time { color: var(--text-muted); min-width: 35px; }
+        .feed-content { flex: 1; }
+        .feed-title { font-weight: 600; margin-bottom: 2px; color: var(--text-main); }
+        .feed-item.hidden { display: none; }
+        
+        .badge { padding: 2px 4px; border-radius: 3px; font-size: 9px; font-weight: 700; text-transform: uppercase; }
+        .badge-danger { background: rgba(239, 68, 68, 0.2); color: #ff6b6b; }
+        .badge-warning { background: rgba(255, 194, 14, 0.2); color: #ffd166; }
+        .badge-success { background: rgba(0, 166, 81, 0.2); color: #06d6a0; }
+
+        /* Tabs */
+        .tab-pane { display: none; flex-direction: column; flex: 1; height: 100%; min-height: 0; animation: fadeIn 0.3s ease-out; }
+        .tab-pane.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .pulse-text { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--f88-green); margin-right: 6px; animation: pulse-green 2s infinite; }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="logo-container">
+            <div class="logo-icon">F</div>
+            <div class="logo-text">F88 DASHBOARD</div>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item active" onclick="switchTab('tab-realtime', this)">
+                <i class="fa-solid fa-bolt"></i> <span class="nav-label">Tổng quan Real-time</span>
+            </li>
+            <li class="nav-item" onclick="switchTab('tab-revenue', this)">
+                <i class="fa-solid fa-chart-pie"></i> <span class="nav-label">Hiệu quả Kinh doanh</span>
+            </li>
+            <li class="nav-item" onclick="switchTab('tab-risk', this)">
+                <i class="fa-solid fa-shield-halved"></i> <span class="nav-label">Chi phí & Rủi ro</span>
+            </li>
+            <li class="nav-item" onclick="switchTab('tab-customer', this)">
+                <i class="fa-solid fa-users"></i> <span class="nav-label">Khách hàng & Thời tiết</span>
+            </li>
+        </ul>
+
+        <div class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Thu gọn/Mở rộng">
+            <i class="fa-solid fa-angles-left" id="toggleIcon"></i>
+            <span class="nav-label" style="margin-left: 10px;">Thu gọn menu</span>
+        </div>
+    </aside>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        
+        <!-- ================= TAB 1: REAL-TIME ================= -->
+        <div id="tab-realtime" class="tab-pane active">
+            <div class="header">
+                <h1 class="page-title"><span class="pulse-text"></span>Tổng quan Real-time</h1>
+            </div>
+
+            <!-- Stats with Quick Actions & Thresholds -->
+            <div class="grid-4-stats">
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <span class="stat-title">Giải ngân hôm nay</span>
+                        <div class="stat-value">185.4M <span class="stat-trend trend-up">+12%</span></div>
+                        <div class="threshold-bar"><div class="threshold-fill bg-success" style="width: 75%"></div></div>
+                        <a href="#" class="quick-action"><i class="fa-solid fa-magnifying-glass"></i> Xem chi tiết HĐ</a>
+                    </div>
+                    <div class="stat-icon icon-green"><i class="fa-solid fa-money-bill-wave"></i></div>
+                </div>
+                <div class="stat-card yellow">
+                    <div class="stat-info">
+                        <span class="stat-title">Tổng thu hôm nay</span>
+                        <div class="stat-value" style="color: var(--f88-yellow)">142.1M <span class="stat-trend trend-down">-5%</span></div>
+                        <div class="threshold-bar"><div class="threshold-fill bg-warning" style="width: 60%"></div></div>
+                        <a href="#" class="quick-action"><i class="fa-solid fa-bell"></i> SMS nhắc nợ tới hạn</a>
+                    </div>
+                    <div class="stat-icon icon-yellow"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+                </div>
+                <div class="stat-card red">
+                    <div class="stat-info">
+                        <span class="stat-title">Net Cashflow</span>
+                        <div class="stat-value" style="color: var(--danger)">-43.3M <span class="stat-trend trend-warning"><i class="fa-solid fa-triangle-exclamation"></i>Âm</span></div>
+                        <div class="threshold-bar"><div class="threshold-fill bg-danger" style="width: 90%"></div></div>
+                        <a href="#" class="quick-action"><i class="fa-solid fa-sliders"></i> Tạm dừng giải ngân</a>
+                    </div>
+                    <div class="stat-icon icon-red"><i class="fa-solid fa-wallet"></i></div>
+                </div>
+                <div class="stat-card red">
+                    <div class="stat-info">
+                        <span class="stat-title">Tỷ lệ PAR 1+ (Live)</span>
+                        <div class="stat-value">8.2% <span class="stat-trend trend-down">+1.2%</span></div>
+                        <div class="threshold-bar"><div class="threshold-fill bg-danger" style="width: 82%"></div></div>
+                        <a href="#" class="quick-action"><i class="fa-solid fa-file-export"></i> Xuất file DPD1</a>
+                    </div>
+                    <div class="stat-icon icon-red"><i class="fa-solid fa-chart-pie"></i></div>
+                </div>
+            </div>
+
+            <!-- Charts Grid: Map Left, Line Middle, Feed Right -->
+            <div class="chart-grid-t1">
+                <!-- Bản đồ Việt Nam -->
+                <div class="chart-card" style="position: relative;">
+                    <div class="chart-title">Cảnh báo Thời tiết Địa lý <i class="fa-solid fa-map-location-dot" style="color: var(--f88-green)"></i></div>
+                    <div id="vnMap"></div>
+                    <div class="map-legend-leaflet">
+                        <div class="legend-item"><div class="legend-color" style="background:#00a651"></div>Bình thường</div>
+                        <div class="legend-item"><div class="legend-color" style="background:#ffc20e"></div>Rủi ro thấp</div>
+                        <div class="legend-item"><div class="legend-color" style="background:#ef4444"></div>Hụt thu cao</div>
+                    </div>
+                </div>
+
+                <!-- Middle Column: Stacked Charts -->
+                <div style="display: flex; flex-direction: column; gap: 12px; min-height: 0;">
+                    <!-- Top Chart: 2 in 1 (Tròn & Cột đôi) -->
+                    <div class="chart-card" style="flex: 1; display: flex; flex-direction: column; padding-bottom: 4px;">
+                        <div class="chart-title" style="margin-bottom: 4px;">Phê duyệt & Cấu trúc Sản phẩm (Live)</div>
+                        <div style="display: flex; flex: 1; gap: 0; min-height: 0;">
+                            <div class="chart-container" style="flex: 1; border-right: 1px solid rgba(255,255,255,0.05); padding-right: 8px;"><canvas id="dailyStatusBar"></canvas></div>
+                            <div class="chart-container" style="flex: 1; padding-left: 8px;"><canvas id="customerProductDoughnut"></canvas></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Line Chart -->
+                    <div class="chart-card" style="flex: 1.2;">
+                        <div class="chart-title">Lưu lượng Giải ngân / Thu (Theo giờ)</div>
+                        <div class="chart-container"><canvas id="realtimeLineChart"></canvas></div>
+                    </div>
+                </div>
+                
+                <!-- Feed & Radar -->
+                <div style="display: flex; flex-direction: column; gap: 12px; min-height: 0;">
+                    <div class="chart-card" style="flex: 1;">
+                        <div class="chart-title">Chỉ số Rủi ro</div>
+                        <div class="chart-container"><canvas id="riskRadarChart"></canvas></div>
+                    </div>
+                    <div class="chart-card" style="flex: 1.5; padding: 12px 12px 0 12px;">
+                        <div class="chart-title" style="margin-bottom: 4px;">Live Event Stream</div>
+                        <div class="feed-tabs-container">
+                            <button class="feed-tab active" onclick="filterFeed('all', this)">Tất cả</button>
+                            <button class="feed-tab" onclick="filterFeed('alert', this)">Cảnh báo</button>
+                            <button class="feed-tab" onclick="filterFeed('txn', this)">Giao dịch</button>
+                            <button class="feed-tab" onclick="filterFeed('weather', this)">Thời tiết</button>
+                        </div>
+                        <ul class="feed-list" id="feedList">
+                            <li class="feed-item" data-type="weather"><div class="feed-time">10:50</div><div class="feed-content"><div class="feed-title"><span class="badge badge-danger">BÃO</span> Cảnh báo mưa giông</div>TP.HCM: Mưa 45mm/h, gió 40km/h. 384 HĐ bị ảnh hưởng.</div></li>
+                            <li class="feed-item" data-type="weather"><div class="feed-time">10:45</div><div class="feed-content"><div class="feed-title"><span class="badge badge-warning">MƯA</span> Mưa vừa Q.Bình Thạnh</div>Lượng mưa 18mm. Ước tính hụt thu 22%.</div></li>
+                            <li class="feed-item" data-type="alert"><div class="feed-time">10:45</div><div class="feed-content"><div class="feed-title"><span class="badge badge-warning">CẢNH BÁO</span> Income Shock cao</div>Shock Score 76/100 tại Bình Thạnh, Gò Vấp.</div></li>
+                            <li class="feed-item" data-type="txn"><div class="feed-time">10:42</div><div class="feed-content"><div class="feed-title"><span class="badge badge-success">GIẢI NGÂN</span> LC-000123</div>4.5M - KH Nguyễn Văn Nam</div></li>
+                            <li class="feed-item" data-type="alert"><div class="feed-time">10:30</div><div class="feed-content"><div class="feed-title"><span class="badge badge-danger">QUÁ HẠN</span> DPD1 Tăng</div>42 khoản chuyển sang DPD1.</div></li>
+                            <li class="feed-item" data-type="weather"><div class="feed-time">10:20</div><div class="feed-content"><div class="feed-title"><span class="badge badge-warning">MƯA</span> Đà Nẵng mưa rải rác</div>Lượng mưa 8mm. Ảnh hưởng nhẹ 120 HĐ.</div></li>
+                            <li class="feed-item" data-type="txn"><div class="feed-time">10:15</div><div class="feed-content"><div class="feed-title"><span class="badge badge-success">THU TIỀN</span> LC-000088</div>+330,000 VND</div></li>
+                            <li class="feed-item" data-type="alert"><div class="feed-time">10:00</div><div class="feed-content"><div class="feed-title"><span class="badge badge-warning">RỦI RO</span> Override</div>NV duyệt ngoại lệ LTV > 60%.</div></li>
+                            <li class="feed-item" data-type="weather"><div class="feed-time">09:30</div><div class="feed-content"><div class="feed-title"><span class="badge badge-success">NẮNG</span> Hà Nội trời nắng</div>Nhiệt độ 32°C. Điều kiện lý tưởng cho tài xế.</div></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 2: HIỆU QUẢ KINH DOANH ================= -->
+        <div id="tab-revenue" class="tab-pane">
+            <div class="header">
+                <h1 class="page-title">💰 Hiệu quả Kinh doanh (Business Performance)</h1>
+            </div>
+
+            <!-- Floating Node for Tab 2 -->
+            <div class="floating-filter-btn" data-panel="filter-panel-revenue">
+                <i class="fa-solid fa-filter"></i>
+            </div>
+            <div class="filter-overlay" id="overlay-revenue" onclick="toggleCardFilter('filter-panel-revenue')">
+                <div class="card-filter-panel" id="filter-panel-revenue" onclick="event.stopPropagation()">
+                    <div class="filter-label">Bộ lọc Hiệu quả KD</div>
+                    <select class="filter-select"><option>Tất cả khu vực</option><option>Hà Nội</option><option>TP. Hồ Chí Minh</option></select>
+                    <div style="display:flex; flex-direction:column; gap:5px;">
+                        <span style="font-size:10px; color:var(--text-muted)">Từ kỳ</span>
+                        <input type="date" class="filter-date" value="2026-01-01">
+                        <span style="font-size:10px; color:var(--text-muted)">Đến kỳ</span>
+                        <input type="date" class="filter-date" value="2026-05-10">
+                    </div>
+                    <select class="filter-select"><option>Kỳ báo cáo: Hàng tháng</option><option>Hàng quý</option><option>Hàng năm</option></select>
+                    <div class="filter-footer">
+                        <button class="btn-refresh" onclick="refreshData(this); toggleCardFilter('filter-panel-revenue')">Áp dụng</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top KPI Row: Large Numbers -->
+            <div class="grid-4-stats">
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <span class="stat-title">Tổng Giải ngân</span>
+                        <div class="stat-value" style="color: var(--f88-green); font-size: 28px;">2.45B</div>
+                        <span class="stat-trend trend-up"><i class="fa-solid fa-arrow-up"></i> +15.2%</span>
+                    </div>
+                    <div class="stat-icon icon-green"><i class="fa-solid fa-money-bill-wave"></i></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <span class="stat-title">Dư nợ Hiện tại</span>
+                        <div class="stat-value" style="color: var(--f88-green); font-size: 28px;">8.72B</div>
+                        <span class="stat-trend trend-up"><i class="fa-solid fa-arrow-up"></i> +8.5%</span>
+                    </div>
+                    <div class="stat-icon icon-green"><i class="fa-solid fa-vault"></i></div>
+                </div>
+                <div class="stat-card yellow">
+                    <div class="stat-info">
+                        <span class="stat-title">HĐ Đang hoạt động</span>
+                        <div class="stat-value" style="color: var(--f88-yellow); font-size: 28px;">18,420</div>
+                        <span class="stat-trend trend-up"><i class="fa-solid fa-arrow-up"></i> +1.8%</span>
+                    </div>
+                    <div class="stat-icon icon-yellow"><i class="fa-solid fa-file-contract"></i></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <span class="stat-title">Tốc độ Tăng trưởng</span>
+                        <div class="stat-value" style="font-size: 28px;">12.3%</div>
+                        <span class="stat-trend trend-up"><i class="fa-solid fa-chart-line"></i> YoY</span>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;"><i class="fa-solid fa-bolt"></i></div>
+                </div>
+            </div>
+
+            <!-- Chart Grid: Profitability & Efficiency Metrics -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; flex: 1; min-height: 0; margin-bottom: 12px;">
+                <!-- NIM -->
+                <div class="chart-card">
+                    <div class="chart-title">NIM (Net Interest Margin)</div>
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 6px;">
+                        <div style="font-size: 32px; font-weight: 700; color: #00a651;">4.2%</div>
+                        <div style="font-size: 10px; color: var(--text-muted);">Thu nhập lãi thuần / Tổng tài sản</div>
+                        <div class="threshold-bar" style="width: 60%; margin-top: 4px;"><div class="threshold-fill bg-success" style="width: 84%"></div></div>
+                    </div>
+                </div>
+                
+                <!-- ROA -->
+                <div class="chart-card">
+                    <div class="chart-title">ROA (Return on Assets)</div>
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 6px;">
+                        <div style="font-size: 32px; font-weight: 700; color: #00a651;">3.8%</div>
+                        <div style="font-size: 10px; color: var(--text-muted);">Lợi nhuận ròng / Tổng tài sản</div>
+                        <div class="threshold-bar" style="width: 60%; margin-top: 4px;"><div class="threshold-fill bg-success" style="width: 76%"></div></div>
+                    </div>
+                </div>
+
+                <!-- ROE -->
+                <div class="chart-card">
+                    <div class="chart-title">ROE (Return on Equity)</div>
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 6px;">
+                        <div style="font-size: 32px; font-weight: 700; color: var(--f88-green);">18.5%</div>
+                        <div style="font-size: 10px; color: var(--text-muted);">Lợi nhuận ròng / Vốn chủ sở hữu</div>
+                        <div class="threshold-bar" style="width: 60%; margin-top: 4px;"><div class="threshold-fill bg-success" style="width: 92%"></div></div>
+                    </div>
+                </div>
+
+                <!-- Cost-to-Income Ratio -->
+                <div class="chart-card yellow">
+                    <div class="chart-title">Cost-to-Income Ratio</div>
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 6px;">
+                        <div style="font-size: 32px; font-weight: 700; color: var(--f88-yellow);">35.2%</div>
+                        <div style="font-size: 10px; color: var(--text-muted);">Chi phí vận hành / Doanh thu</div>
+                        <div class="threshold-bar" style="width: 60%; margin-top: 4px;"><div class="threshold-fill bg-warning" style="width: 70%"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts: Loan Metrics & Performance -->
+            <div class="chart-grid-t2">
+                <!-- Ticket Size Distribution -->
+                <div class="chart-card">
+                    <div class="chart-title">Phân bổ Khoản vay (Nhỏ/Vừa/Lớn)</div>
+                    <div class="chart-container"><canvas id="ticketSizeDistribution"></canvas></div>
+                </div>
+
+                <!-- Average Loan Size & Disbursement Trend -->
+                <div class="chart-card">
+                    <div class="chart-title">Quy mô Vay TB & Giải ngân Theo tháng</div>
+                    <div class="chart-container"><canvas id="avgLoanSizeCombo"></canvas></div>
+                </div>
+
+                <!-- Yield & Cost -->
+                <div style="display: flex; flex-direction: column; gap: 12px; min-height: 0;">
+                    <div class="chart-card" style="flex: 1.5;">
+                        <div class="chart-title">Chi phí Vốn vs Lãi suất Danh mục</div>
+                        <div class="chart-container"><canvas id="costYieldComparison"></canvas></div>
+                    </div>
+                    <div class="chart-card" style="flex: 1;">
+                        <div class="chart-title">Doanh thu Thuần trên HĐ</div>
+                        <div class="chart-container"><canvas id="netRevenuePerLoan"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Row: Loan Growth & Performance -->
+            <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; flex: 1; min-height: 0;">
+                <!-- Loan Growth Rate Timeline -->
+                <div class="chart-card">
+                    <div class="chart-title">Tốc độ Tăng trưởng Danh mục</div>
+                    <div class="chart-container"><canvas id="loanGrowthTimeline"></canvas></div>
+                </div>
+
+                <!-- Outstanding Loan Distribution -->
+                <div class="chart-card">
+                    <div class="chart-title">Cấu trúc Dư nợ</div>
+                    <div class="chart-container"><canvas id="outstandingLoanPie"></canvas></div>
+                </div>
+
+                <!-- Performance Summary Table -->
+                <div class="chart-card" style="padding: 0;">
+                    <div class="chart-title" style="padding: 12px;">📊 Tóm tắt Hiệu quả</div>
+                    <div style="padding: 0 12px; font-size: 11px; line-height: 1.8; flex: 1; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border);">
+                            <span>Avg Loan Size:</span>
+                            <span style="color: var(--f88-green); font-weight: 600;">473K VND</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border);">
+                            <span>Yield on Loan:</span>
+                            <span style="color: var(--f88-green); font-weight: 600;">18.5% p.a.</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border);">
+                            <span>Cost of Fund:</span>
+                            <span style="color: var(--f88-yellow); font-weight: 600;">7.8% p.a.</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border);">
+                            <span>Net Revenue/HĐ:</span>
+                            <span style="color: #3b82f6; font-weight: 600;">87.6K/HĐ</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border);">
+                            <span>Loan Growth YoY:</span>
+                            <span style="color: var(--f88-green); font-weight: 600;">+12.3%</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 6px 0;">
+                            <span>Portfolio Quality:</span>
+                            <span style="color: #06d6a0; font-weight: 600;">Strong ✓</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 3: CHI PHÍ & RỦI RO ================= -->
+        <div id="tab-risk" class="tab-pane">
+            <div class="header">
+                <h1 class="page-title">Chi phí & Rủi ro</h1>
+            </div>
+
+            <!-- Floating Node for Tab 3 -->
+            <div class="floating-filter-btn" data-panel="filter-panel-risk">
+                <i class="fa-solid fa-filter"></i>
+            </div>
+            <div class="filter-overlay" id="overlay-risk" onclick="toggleCardFilter('filter-panel-risk')">
+                <div class="card-filter-panel" id="filter-panel-risk" onclick="event.stopPropagation()">
+                    <div class="filter-label">Bộ lọc Rủi ro</div>
+                    <select class="filter-select"><option>Tất cả khu vực</option><option>Hà Nội</option><option>TP. Hồ Chí Minh</option></select>
+                    <div style="display:flex; flex-direction:column; gap:5px;">
+                        <span style="font-size:10px; color:var(--text-muted)">Thời gian</span>
+                        <input type="date" class="filter-date" value="2026-05-01">
+                        <input type="date" class="filter-date" value="2026-05-10">
+                    </div>
+                    <select class="filter-select"><option>Phân khúc: App Driver</option><option>Phân khúc: Sinh viên</option></select>
+                    <div class="filter-footer">
+                        <button class="btn-refresh" onclick="refreshData(this); toggleCardFilter('filter-panel-risk')">Áp dụng</button>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="grid-4-stats">
+                <div class="stat-card red"><div class="stat-info"><span class="stat-title">PAR 1+</span><span class="stat-value">8.2%</span><div class="threshold-bar"><div class="threshold-fill bg-danger" style="width: 82%"></div></div></div><div class="stat-icon icon-red"><i class="fa-solid fa-circle-exclamation"></i></div></div>
+                <div class="stat-card red"><div class="stat-info"><span class="stat-title">PAR 7+</span><span class="stat-value">3.5%</span><div class="threshold-bar"><div class="threshold-fill bg-danger" style="width: 70%"></div></div></div><div class="stat-icon icon-red"><i class="fa-solid fa-triangle-exclamation"></i></div></div>
+                <div class="stat-card"><div class="stat-info"><span class="stat-title">Write-off Rate</span><span class="stat-value">0.8%</span><div class="threshold-bar"><div class="threshold-fill bg-success" style="width: 20%"></div></div></div><div class="stat-icon icon-green"><i class="fa-solid fa-shield-check"></i></div></div>
+                <div class="stat-card yellow"><div class="stat-info"><span class="stat-title">LTV Trung bình</span><span class="stat-value">46.5%</span><div class="threshold-bar"><div class="threshold-fill bg-warning" style="width: 60%"></div></div></div><div class="stat-icon icon-yellow"><i class="fa-solid fa-scale-balanced"></i></div></div>
+            </div>
+
+            <div class="chart-grid-t3">
+                <div class="chart-card col-span-2">
+                    <div class="chart-title">Vintage Analysis (Xu hướng Nợ quá hạn)</div>
+                    <div class="chart-container"><canvas id="vintageLineChart"></canvas></div>
+                </div>
+                <div class="chart-card row-span-2">
+                    <div class="chart-title">Phân tán LTV vs Thu Nhập (Phân vùng 4 góc)</div>
+                    <div class="chart-container"><canvas id="riskBubbleChart"></canvas></div>
+                    <div style="font-size: 10px; color: var(--text-muted); text-align: center; margin-top: 4px;">X: Thu nhập (K VNĐ), Y: LTV (%), Size: Số dư nợ</div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Nợ xấu theo Quận</div>
+                    <div class="chart-container"><canvas id="riskHBarChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Cấu trúc Rủi ro</div>
+                    <div class="chart-container"><canvas id="riskTypePie"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 4: KHÁCH HÀNG & THỜI TIẾT ================= -->
+        <div id="tab-customer" class="tab-pane">
+            <div class="header">
+                <h1 class="page-title">Khách hàng & Thời tiết</h1>
+            </div>
+
+            <!-- Floating Node for Tab 4 -->
+            <div class="floating-filter-btn" data-panel="filter-panel-customer">
+                <i class="fa-solid fa-filter"></i>
+            </div>
+            <div class="filter-overlay" id="overlay-customer" onclick="toggleCardFilter('filter-panel-customer')">
+                <div class="card-filter-panel" id="filter-panel-customer" onclick="event.stopPropagation()">
+                    <div class="filter-label">Bộ lọc KH & Thời tiết</div>
+                    <select class="filter-select"><option>Tất cả khu vực</option><option>Hà Nội</option><option>TP. Hồ Chí Minh</option></select>
+                    <div style="display:flex; flex-direction:column; gap:5px;">
+                        <input type="date" class="filter-date" value="2026-05-01">
+                        <input type="date" class="filter-date" value="2026-05-10">
+                    </div>
+                    <div class="shock-badge" style="background:rgba(239,68,68,0.1); color:#ffd166; padding:8px; border-radius:6px; font-size:10px; border:1px solid rgba(239,68,68,0.2); text-align:center;">
+                        <i class="fa-solid fa-cloud-bolt"></i> Weather Shock: 76/100
+                    </div>
+                    <div class="filter-footer">
+                        <button class="btn-refresh" onclick="refreshData(this); toggleCardFilter('filter-panel-customer')">Áp dụng</button>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="grid-4-stats">
+                <div class="stat-card"><div class="stat-info"><span class="stat-title">KH Active</span><span class="stat-value">4,250</span></div><div class="stat-icon icon-green"><i class="fa-solid fa-users"></i></div></div>
+                <div class="stat-card"><div class="stat-info"><span class="stat-title">Tỷ lệ Tái vay</span><span class="stat-value" style="color: var(--f88-green)">65%</span></div><div class="stat-icon icon-green"><i class="fa-solid fa-rotate"></i></div></div>
+                <div class="stat-card yellow"><div class="stat-info"><span class="stat-title">Thu nhập TB/Ngày</span><span class="stat-value">520K</span></div><div class="stat-icon icon-yellow"><i class="fa-solid fa-wallet"></i></div></div>
+                <div class="stat-card yellow"><div class="stat-info"><span class="stat-title">DTI (Gánh nặng nợ)</span><span class="stat-value" style="color: var(--f88-yellow)">48%</span><div class="threshold-bar"><div class="threshold-fill bg-warning" style="width: 80%"></div></div></div><div class="stat-icon icon-yellow"><i class="fa-solid fa-weight-hanging"></i></div></div>
+            </div>
+
+            <div class="chart-grid-t4">
+                <div class="chart-card">
+                    <div class="chart-title">Thu nhập vs Lượng mưa (Combo Bar & Line)</div>
+                    <div class="chart-container"><canvas id="incomeWeatherCombo"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Tuổi vs Thu nhập (Scatter)</div>
+                    <div class="chart-container"><canvas id="ageIncomeScatter"></canvas></div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 12px; min-height: 0;">
+                    <div class="chart-card" style="flex: 1;">
+                        <div class="chart-title">Chân dung KH</div>
+                        <div class="chart-container"><canvas id="customerProfileRadar"></canvas></div>
+                    </div>
+                    <div class="chart-card" style="flex: 1;">
+                        <div class="chart-title">Nền tảng Tài xế</div>
+                        <div class="chart-container"><canvas id="platformDoughnut"></canvas></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Tab switching
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            // Close all open filter overlays when switching tabs
+            document.querySelectorAll('.filter-overlay').forEach(o => o.classList.remove('active'));
+        }
+
+        // Floating Filter Toggle
+        function toggleCardFilter(panelId) {
+            const panel = document.getElementById(panelId);
+            const overlay = panel.closest('.filter-overlay');
+            overlay.classList.toggle('active');
+        }
+
+        // Draggable FAB Logic
+        function initDraggableFAB() {
+            const buttons = document.querySelectorAll('.floating-filter-btn');
+            buttons.forEach(btn => {
+                let isDragging = false;
+                let startX, startY, initialX, initialY;
+                let dragThreshold = 5; // pixels to distinguish click from drag
+
+                btn.addEventListener('mousedown', (e) => {
+                    isDragging = false;
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    
+                    const rect = btn.getBoundingClientRect();
+                    initialX = rect.left;
+                    initialY = rect.top;
+
+                    const onMouseMove = (e) => {
+                        const dx = e.clientX - startX;
+                        const dy = e.clientY - startY;
+                        
+                        if (Math.abs(dx) > dragThreshold || Math.abs(dy) > dragThreshold) {
+                            isDragging = true;
+                            // Switch to top/left for positioning
+                            btn.style.bottom = 'auto';
+                            btn.style.right = 'auto';
+                            btn.style.left = (initialX + dx) + 'px';
+                            btn.style.top = (initialY + dy) + 'px';
+                        }
+                    };
+
+                    const onMouseUp = () => {
+                        document.removeEventListener('mousemove', onMouseMove);
+                        document.removeEventListener('mouseup', onMouseUp);
+                        
+                        if (!isDragging) {
+                            // Only toggle filter if we didn't drag
+                            const panelId = btn.getAttribute('data-panel');
+                            toggleCardFilter(panelId);
+                        }
+                    };
+
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
+                });
+            });
+        }
+
+        // Sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const icon = document.getElementById('toggleIcon');
+            sidebar.classList.toggle('collapsed');
+            if (sidebar.classList.contains('collapsed')) {
+                icon.classList.remove('fa-angles-left');
+                icon.classList.add('fa-angles-right');
+            } else {
+                icon.classList.remove('fa-angles-right');
+                icon.classList.add('fa-angles-left');
+            }
+            // Invalidate Leaflet map size after transition
+            setTimeout(() => { if (window._vnMap) window._vnMap.invalidateSize(); }, 350);
+        }
+
+        function refreshData(btn) {
+            btn.classList.add('spin');
+            setTimeout(() => btn.classList.remove('spin'), 800);
+        }
+
+        // Feed filtering
+        function filterFeed(type, element) {
+            document.querySelectorAll('.feed-tab').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            document.querySelectorAll('.feed-item').forEach(item => {
+                if(type === 'all' || item.getAttribute('data-type') === type) {
+                    item.classList.remove('hidden');
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+        }
+
+        // Leaflet Map Init
+        function initVietnamMap() {
+            const vnBounds = L.latLngBounds([8.5, 102.0], [23.5, 109.5]);
+            const map = L.map('vnMap', {
+                zoomControl: true,
+                attributionControl: false,
+                minZoom: 5,
+                maxZoom: 10
+            });
+            map.fitBounds(vnBounds);
+            window._vnMap = map;
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png').addTo(map);
+
+            // Mock province risk data
+            const provinceRisk = {
+                'Ho Chi Minh': { risk: 'high', weather: 'Mưa lớn, Kẹt xe', loans: '1,830', impact: '-22%', temp: '28°C' },
+                'Ha Noi': { risk: 'low', weather: 'Nắng ráo', loans: '1,050', impact: '+2%', temp: '32°C' },
+                'Da Nang': { risk: 'medium', weather: 'Mưa rải rác', loans: '420', impact: '-5%', temp: '30°C' },
+                'Can Tho': { risk: 'low', weather: 'Ổn định', loans: '310', impact: '0%', temp: '31°C' },
+                'Binh Duong': { risk: 'medium', weather: 'Mưa nhẹ', loans: '280', impact: '-8%', temp: '29°C' },
+                'Dong Nai': { risk: 'medium', weather: 'Mưa nhẹ', loans: '190', impact: '-6%', temp: '29°C' },
+                'Hai Phong': { risk: 'low', weather: 'Nắng', loans: '150', impact: '+1%', temp: '31°C' },
+                'Khanh Hoa': { risk: 'low', weather: 'Nắng', loans: '90', impact: '0%', temp: '33°C' },
+            };
+
+            function getRiskColor(risk) {
+                if (risk === 'high') return '#ef4444';
+                if (risk === 'medium') return '#ffc20e';
+                return '#00a651';
+            }
+
+            // City markers with tooltips
+            const cities = [
+                { name: 'Hà Nội', key: 'Ha Noi', lat: 21.028, lng: 105.854 },
+                { name: 'TP. Hồ Chí Minh', key: 'Ho Chi Minh', lat: 10.823, lng: 106.630 },
+                { name: 'Đà Nẵng', key: 'Da Nang', lat: 16.054, lng: 108.202 },
+                { name: 'Cần Thơ', key: 'Can Tho', lat: 10.045, lng: 105.746 },
+                { name: 'Bình Dương', key: 'Binh Duong', lat: 11.166, lng: 106.629 },
+                { name: 'Đồng Nai', key: 'Dong Nai', lat: 10.945, lng: 106.824 },
+                { name: 'Hải Phòng', key: 'Hai Phong', lat: 20.844, lng: 106.688 },
+                { name: 'Khánh Hòa', key: 'Khanh Hoa', lat: 12.238, lng: 109.196 },
+            ];
+
+            cities.forEach(c => {
+                const d = provinceRisk[c.key] || { risk: 'low', weather: 'N/A', loans: '0', impact: '0%', temp: 'N/A' };
+                const color = getRiskColor(d.risk);
+                const marker = L.circleMarker([c.lat, c.lng], { radius: 7, fillColor: color, color: color, weight: 2, opacity: 0.9, fillOpacity: 0.6 }).addTo(map);
+                marker.bindTooltip(
+                    `<b>${c.name}</b><br>` +
+                    `<span style='color:#94a3b8'>Thời tiết:</span> ${d.weather} (${d.temp})<br>` +
+                    `<span style='color:#94a3b8'>Active HĐ:</span> ${d.loans}<br>` +
+                    `<span style='color:#94a3b8'>Ước tính thu:</span> <span style='color:${color}'>${d.impact}</span>`,
+                    { className: 'leaflet-tooltip-custom', direction: 'right', offset: [10, 0] }
+                );
+            });
+
+            // Load GeoJSON provinces
+            fetch('https://raw.githubusercontent.com/TungTh/tungth.github.io/master/data/vietnam.geojson')
+                .then(r => r.json())
+                .then(data => {
+                    L.geoJSON(data, {
+                        style: function(feature) {
+                            const name = feature.properties.Ten_Tinh || feature.properties.name || '';
+                            let matchedRisk = 'low';
+                            for (const [key, val] of Object.entries(provinceRisk)) {
+                                if (name.toLowerCase().includes(key.toLowerCase().split(' ')[0])) { matchedRisk = val.risk; break; }
+                            }
+                            return { 
+                                color: '#00a651', // In đậm màu xanh lá cho ranh giới
+                                weight: 2, 
+                                opacity: 0.8,
+                                fillColor: getRiskColor(matchedRisk), 
+                                fillOpacity: matchedRisk === 'low' ? 0.05 : 0.25 
+                            };
+                        },
+                        onEachFeature: function(feature, layer) {
+                            const name = feature.properties.Ten_Tinh || feature.properties.name || 'N/A';
+                            layer.bindTooltip(name, { className: 'leaflet-tooltip-custom', sticky: true });
+                            layer.on('mouseover', function() { this.setStyle({ fillOpacity: 0.4, weight: 3, opacity: 1 }); });
+                            layer.on('mouseout', function() { 
+                                let matchedRisk = 'low';
+                                for (const [key, val] of Object.entries(provinceRisk)) {
+                                    if (name.toLowerCase().includes(key.toLowerCase().split(' ')[0])) { matchedRisk = val.risk; break; }
+                                }
+                                this.setStyle({ fillOpacity: matchedRisk === 'low' ? 0.05 : 0.25, weight: 2, opacity: 0.8 }); 
+                            });
+                        }
+                    }).addTo(map);
+                })
+                .catch(() => { console.warn('GeoJSON load failed, map shows markers only.'); });
+
+            setTimeout(() => map.invalidateSize(), 300);
+        }
+
+        // Global Chart Defaults
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.05)';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.maintainAspectRatio = false;
+        Chart.defaults.plugins.legend.labels.boxWidth = 10;
+        Chart.defaults.plugins.legend.labels.font = { size: 10 };
+
+        // Custom Plugins
+        const centerTextPlugin = {
+            id: 'centerText',
+            beforeDraw: function(chart) {
+                if (chart.config.type !== 'doughnut') return;
+                const centerOpts = chart.config.options.plugins?.centerText;
+                if (!centerOpts) return;
+                const { top, bottom, left, right } = chart.chartArea;
+                const cx = (left + right) / 2;
+                const cy = (top + bottom) / 2;
+                const areaH = bottom - top;
+                const ctx = chart.ctx;
+                ctx.save();
+                // Main text
+                const mainSize = Math.max(10, areaH / 6);
+                ctx.font = 'bold ' + mainSize + 'px Inter';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#fff';
+                ctx.fillText(centerOpts.mainText || '', cx, cy + 2);
+                // Sub text
+                if (centerOpts.subText) {
+                    const subSize = Math.max(8, mainSize * 0.5);
+                    ctx.font = 'normal ' + subSize + 'px Inter';
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.fillText(centerOpts.subText, cx, cy - mainSize * 0.8);
+                }
+                ctx.restore();
+            }
+        };
+
+        const quadrantPlugin = {
+            id: 'quadrants',
+            beforeDraw: function(chart) {
+                if (chart.config.type === 'bubble') {
+                    const {ctx, chartArea: {top, bottom, left, right}, scales: {x, y}} = chart;
+                    const midX = x.getPixelForValue(500); // threshold income 500k
+                    const midY = y.getPixelForValue(40); // threshold LTV 40%
+                    ctx.save();
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([5, 5]);
+                    
+                    // Draw crosshairs
+                    if(midY >= top && midY <= bottom) { ctx.beginPath(); ctx.moveTo(left, midY); ctx.lineTo(right, midY); ctx.stroke(); }
+                    if(midX >= left && midX <= right) { ctx.beginPath(); ctx.moveTo(midX, top); ctx.lineTo(midX, bottom); ctx.stroke(); }
+                    
+                    // Highlight High Risk Zone (Top Left)
+                    ctx.fillStyle = 'rgba(239, 68, 68, 0.05)';
+                    ctx.fillRect(left, top, midX - left, midY - top);
+                    ctx.fillStyle = 'rgba(239, 68, 68, 0.8)';
+                    ctx.font = "10px Inter";
+                    ctx.fillText('Rủi ro cao nhất', left + 10, top + 15);
+                    ctx.restore();
+                }
+            }
+        };
+
+        Chart.register(centerTextPlugin);
+        Chart.register(quadrantPlugin);
+
+        // Tooltip Formatters
+        const currencyFormatter = (val) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumSignificantDigits: 3 }).format(val * 1000000);
+        const percentFormatter = (val) => val + '%';
+
+        window.onload = function() {
+            initVietnamMap();
+            initDraggableFAB();
+            // === TAB 1 CHARTS ===
+            new Chart(document.getElementById('dailyStatusBar').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Quá hạn', 'Chấp thuận', 'Từ chối'],
+                    datasets: [{
+                        data: [45, 210, 32],
+                        backgroundColor: ['#ffc20e', '#00a651', '#ef4444'],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 9 } } } }
+                }
+            });
+
+            new Chart(document.getElementById('customerProductDoughnut').getContext('2d'), {
+                type: 'doughnut',
+                data: { 
+                    labels: ['Mới (XM)', 'Cũ (XM)', 'Mới (Ô tô)', 'Cũ (Ô tô)'], 
+                    datasets: [{ 
+                        data: [120, 350, 45, 110], 
+                        backgroundColor: ['#00a651', '#34d399', '#3b82f6', '#93c5fd'], 
+                        borderWidth: 0 
+                    }] 
+                },
+                options: { 
+                    cutout: '55%', 
+                    plugins: { 
+                        legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 9 }, padding: 6 } }, 
+                        centerText: { mainText: '625', subText: 'Hồ sơ' } 
+                    } 
+                }
+            });
+
+            new Chart(document.getElementById('realtimeLineChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00'],
+                    datasets: [
+                        { label: 'Giải ngân', data: [12,25,45,60,20,30,42,55], borderColor: '#00a651', backgroundColor: 'rgba(0, 166, 81, 0.1)', borderWidth: 2, fill: true, tension: 0.4 },
+                        { label: 'Thu nợ', data: [8,15,22,35,40,25,30,48], borderColor: '#ffc20e', backgroundColor: 'rgba(255, 194, 14, 0.1)', borderWidth: 2, fill: true, tension: 0.4 }
+                    ]
+                },
+                options: { 
+                    plugins: { 
+                        legend: { position: 'top' },
+                        tooltip: { callbacks: { label: function(context) { return context.dataset.label + ': ' + currencyFormatter(context.parsed.y); } } }
+                    }, 
+                    scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return value + 'M'; } } } } 
+                }
+            });
+
+            new Chart(document.getElementById('riskRadarChart').getContext('2d'), {
+                type: 'radar',
+                data: {
+                    labels: ['Thời tiết', 'Kẹt xe', 'Hụt thu', 'DTI cao', 'LTV cao', 'Fraud'],
+                    datasets: [{
+                        label: 'Rủi ro',
+                        data: [90, 75, 80, 50, 45, 20],
+                        backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                        borderColor: '#ef4444',
+                        pointBackgroundColor: '#ef4444'
+                    }]
+                },
+                options: { scales: { r: { angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { font: {size: 9} }, ticks: { display: false, min: 0, max: 100 } } }, plugins: { legend: { display: false } } }
+            });
+
+            // === TAB 2 CHARTS (BUSINESS PERFORMANCE) ===
+            
+            // Ticket Size Distribution
+            new Chart(document.getElementById('ticketSizeDistribution').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Nhỏ (<300K)', 'Vừa (300K-1M)', 'Lớn (>1M)'],
+                    datasets: [{
+                        data: [35, 45, 20],
+                        backgroundColor: ['#3b82f6', '#ffc20e', '#00a651'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '60%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 9 }, padding: 8 } },
+                        centerText: { mainText: '18.4K HĐ', subText: 'Đang hoạt động' }
+                    }
+                }
+            });
+
+            // Average Loan Size & Disbursement Combo
+            new Chart(document.getElementById('avgLoanSizeCombo').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['T1', 'T2', 'T3', 'T4', 'T5'],
+                    datasets: [
+                        {
+                            type: 'line',
+                            label: 'Quy mô TB (K)',
+                            data: [450, 465, 480, 490, 473],
+                            borderColor: '#00a651',
+                            yAxisID: 'y1',
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#00a651'
+                        },
+                        {
+                            type: 'bar',
+                            label: 'Giải ngân (B)',
+                            data: [420, 580, 650, 720, 480],
+                            backgroundColor: '#ffc20e',
+                            borderRadius: 4,
+                            yAxisID: 'y'
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        y: { position: 'left', ticks: { callback: function(value) { return value + 'M'; } } },
+                        y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: function(value) { return value + 'K'; } } }
+                    },
+                    plugins: { tooltip: { callbacks: { label: function(context) { return context.dataset.label + ': ' + context.parsed.y; } } } }
+                }
+            });
+
+            // Cost of Fund vs Yield on Loan
+            new Chart(document.getElementById('costYieldComparison').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['T1', 'T2', 'T3', 'T4', 'T5'],
+                    datasets: [
+                        { label: 'Chi phí Vốn (%)', data: [7.2, 7.5, 7.8, 7.6, 7.8], backgroundColor: 'rgba(239, 68, 68, 0.6)' },
+                        { label: 'Lãi suất TB (%)', data: [18.2, 18.4, 18.5, 18.3, 18.5], backgroundColor: 'rgba(0, 166, 81, 0.6)' }
+                    ]
+                },
+                options: {
+                    scales: { y: { ticks: { callback: function(value) { return value + '%'; } } } },
+                    plugins: { tooltip: { callbacks: { label: function(context) { return context.dataset.label + ': ' + context.parsed.y + '%'; } } } }
+                }
+            });
+
+            // Net Revenue per Loan
+            new Chart(document.getElementById('netRevenuePerLoan').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['T1', 'T2', 'T3', 'T4', 'T5'],
+                    datasets: [{
+                        label: 'Doanh thu TB/HĐ (K)',
+                        data: [78, 82, 87, 85, 88],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#3b82f6',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: true }, tooltip: { callbacks: { label: function(context) { return context.parsed.y + 'K VND'; } } } },
+                    scales: { y: { ticks: { callback: function(value) { return value + 'K'; } } } }
+                }
+            });
+
+            // Loan Growth Rate Timeline
+            new Chart(document.getElementById('loanGrowthTimeline').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['5/2024', '6/2024', '7/2024', '8/2024', '9/2024', '10/2024', '11/2024', '12/2024', '1/2025', '2/2025', '3/2025', '4/2025', '5/2025'],
+                    datasets: [{
+                        label: 'Tốc độ Tăng trưởng (%)',
+                        data: [8.2, 9.1, 10.5, 11.2, 11.8, 12.1, 12.0, 11.9, 12.5, 12.8, 12.3, 12.1, 12.3],
+                        borderColor: '#00a651',
+                        backgroundColor: 'rgba(0, 166, 81, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#00a651'
+                    }]
+                },
+                options: {
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: function(context) { return context.parsed.y + '% YoY'; } } } 
+                    },
+                    scales: { y: { ticks: { callback: function(value) { return value + '%'; } } } }
+                }
+            });
+
+            // Outstanding Loan Distribution
+            new Chart(document.getElementById('outstandingLoanPie').getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: ['Hoạt động', 'Chuẩn bị đóng', 'Đã tất toán'],
+                    datasets: [{
+                        data: [75, 18, 7],
+                        backgroundColor: ['#00a651', '#ffc20e', '#6b7280'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    plugins: { legend: { position: 'bottom', labels: { font: { size: 9 } } } }
+                }
+            });
+
+            // === TAB 3 CHARTS ===
+            new Chart(document.getElementById('vintageLineChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5'],
+                    datasets: [
+                        { label: 'Cohort T1', data: [1.2, 2.5, 3.8, 4.1, 4.5], borderColor: '#3b82f6', tension: 0.3 },
+                        { label: 'Cohort T2', data: [0, 1.5, 3.0, 4.2, 5.8], borderColor: '#ef4444', tension: 0.3 },
+                        { label: 'Cohort T3', data: [0, 0, 1.1, 2.3, 3.1], borderColor: '#00a651', tension: 0.3 }
+                    ]
+                },
+                options: { 
+                    plugins: { tooltip: { callbacks: { label: function(context) { return context.dataset.label + ': ' + percentFormatter(context.parsed.y); } } } },
+                    scales: { y: { ticks: { callback: function(value) { return value + '%'; } } } }
+                }
+            });
+
+            new Chart(document.getElementById('riskBubbleChart').getContext('2d'), {
+                type: 'bubble',
+                data: {
+                    datasets: [{
+                        label: 'Nhóm rủi ro',
+                        data: [{x: 400, y: 55, r: 15}, {x: 450, y: 48, r: 25}, {x: 600, y: 35, r: 15}, {x: 350, y: 65, r: 20}, {x: 550, y: 30, r: 10}],
+                        backgroundColor: 'rgba(239, 68, 68, 0.5)', borderColor: '#ef4444'
+                    }]
+                },
+                options: { 
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return 'Thu nhập: ' + context.raw.x + 'K, LTV: ' + context.raw.y + '%'; } } } },
+                    scales: { x: { min: 200, max: 800, ticks: { callback: function(value) { return value + 'K'; } } }, y: { min: 20, max: 80, ticks: { callback: function(value) { return value + '%'; } } } }
+                }
+            });
+
+            new Chart(document.getElementById('riskHBarChart').getContext('2d'), {
+                type: 'bar',
+                data: { labels: ['Bình Thạnh', 'Gò Vấp', 'Thủ Đức', 'Quận 1'], datasets: [{ label: 'DPD %', data: [12, 8, 5, 2], backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#00a651'], borderRadius: 4 }] },
+                options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { ticks: { callback: function(value) { return value + '%'; } } } } }
+            });
+
+            new Chart(document.getElementById('riskTypePie').getContext('2d'), {
+                type: 'pie',
+                data: { labels: ['Mất khả năng trả', 'Lừa đảo', 'Quên lịch', 'Khác'], datasets: [{ data: [50, 15, 30, 5], backgroundColor: ['#ef4444', '#9333ea', '#f59e0b', '#6b7280'], borderWidth: 0 }] },
+                options: { plugins: { legend: { position: 'right' } } }
+            });
+
+            // === TAB 4 CHARTS ===
+            new Chart(document.getElementById('incomeWeatherCombo').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+                    datasets: [
+                        { type: 'line', label: 'Lượng mưa (mm)', data: [5, 10, 45, 60, 20, 5, 0], borderColor: '#3b82f6', yAxisID: 'y1', tension: 0.3 },
+                        { type: 'bar', label: 'Thu nhập TB', data: [600, 580, 420, 350, 500, 650, 700], backgroundColor: '#ffc20e', borderRadius: 4, yAxisID: 'y' }
+                    ]
+                },
+                options: { 
+                    scales: { 
+                        y: { position: 'left', ticks: { callback: function(value) { return value + 'K'; } } }, 
+                        y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: function(value) { return value + 'mm'; } } } 
+                    } 
+                }
+            });
+
+            new Chart(document.getElementById('ageIncomeScatter').getContext('2d'), {
+                type: 'scatter',
+                data: { datasets: [{ label: 'Tài xế', data: [{x: 22, y: 400}, {x: 25, y: 550}, {x: 30, y: 700}, {x: 35, y: 650}, {x: 40, y: 500}, {x: 45, y: 450}, {x: 28, y: 600}], backgroundColor: '#00a651' }] },
+                options: { 
+                    scales: { x: { title: {display: true, text: 'Độ tuổi'} }, y: { title: {display: true, text: 'Thu nhập (K VND)'} } }, 
+                    plugins: { legend: { display: false } } 
+                }
+            });
+
+            new Chart(document.getElementById('customerProfileRadar').getContext('2d'), {
+                type: 'radar',
+                data: { labels: ['Kinh nghiệm', 'Thu nhập', 'Ổn định', 'Tài sản', 'Lịch sử trả'], datasets: [{ label: 'Điểm KH', data: [80, 60, 50, 70, 85], backgroundColor: 'rgba(0, 166, 81, 0.2)', borderColor: '#00a651' }] },
+                options: { scales: { r: { angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { font: {size: 9} }, ticks: { display: false } } }, plugins: { legend: { display: false } } }
+            });
+
+            new Chart(document.getElementById('platformDoughnut').getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: ['Grab', 'ShopeeFood', 'Be', 'Khác'], datasets: [{ data: [45, 25, 20, 10], backgroundColor: ['#00a651', '#ef4444', '#f59e0b', '#6b7280'], borderWidth: 0 }] },
+                options: { cutout: '65%', plugins: { legend: { position: 'right' } } }
+            });
+        };
+    </script>
+</body>
+</html>

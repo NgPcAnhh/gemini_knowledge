@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F88 - Dashboard Quản Trị</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/sidebar.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+
+    <!-- External JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom JS -->
+    <script src="js/common/utils.js"></script>
+    <script src="js/common/main.js"></script>
+    <script src="js/realtime/map.js"></script>
+    <script src="js/realtime/charts.js"></script>
+    <script src="js/revenue/charts.js"></script>
+    <script src="js/risk/charts.js"></script>
+    <script src="js/customer/charts.js"></script>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="logo-container">
+            <div class="logo-icon">F</div>
+            <div class="logo-text">F88 DASHBOARD</div>
+        </div>
+        <ul class="nav-menu">
+            <!-- Thêm href="javascript:void(0)" hoặc onclick, nhưng onclick đã có -->
+            <li class="nav-item active" onclick="switchTab('tab-realtime', this)">
+                <i class="fa-solid fa-bolt"></i> <span class="nav-label">Tổng quan Real-time</span>
+            </li>
+            <li class="nav-item" onclick="switchTab('tab-revenue', this)">
+                <i class="fa-solid fa-chart-pie"></i> <span class="nav-label">Hiệu quả Kinh doanh</span>
+            </li>
+            <li class="nav-item" onclick="switchTab('tab-risk', this)">
+                <i class="fa-solid fa-shield-halved"></i> <span class="nav-label">Chi phí & Rủi ro</span>
+            </li>
+            <li class="nav-item" onclick="switchTab('tab-customer', this)">
+                <i class="fa-solid fa-users"></i> <span class="nav-label">Chân dung Khách hàng</span>
+            </li>
+        </ul>
+
+        <div class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Thu gọn/Mở rộng">
+            <i class="fa-solid fa-angles-left" id="toggleIcon"></i>
+            <span class="nav-label" style="margin-left: 10px;">Thu gọn menu</span>
+        </div>
+    </aside>
+
+    <!-- Main Content Container -->
+    <main class="main-content tab-pane active" id="main-content-container" style="display: flex;">
+        <!-- Nội dung tab sẽ được fetch vào đây -->
+    </main>
+
+</body>
+
+</html>

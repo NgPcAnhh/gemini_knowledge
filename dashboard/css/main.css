@@ -1,0 +1,27 @@
+:root {
+    --f88-green: #00a651;
+    --f88-green-glow: rgba(0, 166, 81, 0.4);
+    --f88-yellow: #ffc20e;
+    --f88-yellow-glow: rgba(255, 194, 14, 0.4);
+    --bg-dark: #0b0f19;
+    --surface: rgba(255, 255, 255, 0.03);
+    --surface-hover: rgba(255, 255, 255, 0.08);
+    --border: rgba(255, 255, 255, 0.05);
+    --text-main: #f1f5f9;
+    --text-muted: #94a3b8;
+    --danger: #ef4444;
+    --danger-glow: rgba(239, 68, 68, 0.4);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    background-image: 
+        radial-gradient(circle at 15% 50%, rgba(0, 166, 81, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 85% 30%, rgba(255, 194, 14, 0.05) 0%, transparent 50%);
+}
