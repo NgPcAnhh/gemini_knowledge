@@ -24,7 +24,7 @@
             </div>
 
             <!-- Top KPI Row: Lending Operations Metrics -->
-            <div class="grid-8-stats">
+            <div class="grid-6-stats">
                 <div class="stat-card">
                     <div class="stat-info">
                         <span class="stat-title">Tỷ lệ Sử dụng Vốn</span>
@@ -49,14 +49,6 @@
                     </div>
                     <div class="stat-icon icon-yellow"><i class="fa-solid fa-calendar-check"></i></div>
                 </div>
-                <div class="stat-card red">
-                    <div class="stat-info">
-                        <span class="stat-title">NIM (Biên lãi ròng)</span>
-                        <div class="stat-value" style="color: var(--danger);">4.2%</div>
-                        <span class="stat-trend trend-down"><i class="fa-solid fa-arrow-down"></i> vs kỳ trước: 4.5%</span>
-                    </div>
-                    <div class="stat-icon icon-red"><i class="fa-solid fa-percent"></i></div>
-                </div>
                 <div class="stat-card">
                     <div class="stat-info">
                         <span class="stat-title">ROI</span>
@@ -64,14 +56,6 @@
                         <span class="stat-trend trend-up"><i class="fa-solid fa-arrow-up"></i> vs kỳ trước: 5.2%</span>
                     </div>
                     <div class="stat-icon icon-green"><i class="fa-solid fa-percent"></i></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-info">
-                        <span class="stat-title">Lợi suất Danh mục</span>
-                        <div class="stat-value" style="color: var(--f88-green);">17.6%</div>
-                        <span class="stat-trend trend-up"><i class="fa-solid fa-arrow-up"></i> vs kỳ trước: 17.0%</span>
-                    </div>
-                    <div class="stat-icon icon-green"><i class="fa-solid fa-piggy-bank"></i></div>
                 </div>
                 <div class="stat-card red">
                     <div class="stat-info">
@@ -108,7 +92,7 @@
                 <!-- Yield & Cost -->
                 <div style="display: flex; flex-direction: column; gap: 12px; min-height: 0;">
                     <div class="chart-card" style="flex: 1.5;">
-                        <div class="chart-title">Chi phí vốn vs Lợi suất Danh mục</div>
+                        <div class="chart-title">Diễn biến Chi phí vốn</div>
                         <div class="chart-container"><canvas id="costYieldComparison"></canvas></div>
                     </div>
                     <div class="chart-card" style="flex: 1;">
@@ -151,10 +135,6 @@
                         <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border);">
                             <span>Mức độ Bao phủ:</span>
                             <span style="color: #3b82f6; font-weight: 600;">Đầy đủ</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border);">
-                            <span>NIM (Biên lãi ròng):</span>
-                            <span style="color: var(--f88-green); font-weight: 600;">4.2%</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; padding: 6px 0;">
                             <span>Chất lượng Danh mục:</span>

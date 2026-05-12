@@ -5,6 +5,14 @@
 
 /* Compact Stats Grid */
 .grid-4-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px; flex-shrink: 0; }
+.grid-6-stats { 
+    display: grid; 
+    grid-template-columns: repeat(6, 1fr); 
+    gap: 8px; 
+    margin-bottom: 12px; 
+    flex-shrink: 0; 
+}
+
 .grid-8-stats { 
     display: grid; 
     grid-template-columns: repeat(8, 1fr); 

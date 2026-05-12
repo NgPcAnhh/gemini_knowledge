@@ -1,0 +1,322 @@
+---
+title: ERD — Hệ Thống Quản Lý Tổ Chức Tín Dụng
+---
+erDiagram
+
+%% ===================================================
+%% PHẦN 1: CONFORMED DIMENSIONS
+%% ===================================================
+
+    Dim_ThoiGian {
+        int     Date_Key        PK
+        date    FullDate
+        int     Nam
+        int     Quy
+        int     Thang
+        int     Tuan
+        int     Ngay
+        varchar TenThu
+        boolean LaaNgayLe
+        boolean LaaNgayCuoiThang
+    }
+
+    Dim_ToaDo {
+        serial  ToaDo_Key       PK
+        decimal Vido_Latitude
+        decimal Kinhdo_Longitude
+        varchar MuiGio_Timezone
+        varchar TenKhuVuc
+    }
+
+    Dim_CuaHang {
+        serial  CuaHang_Key     PK
+        varchar MaCuaHang
+        varchar TenCuaHang
+        text    DiaChi
+        varchar KhuVuc
+        date    NgayKhaiTruong
+        varchar TrangThai
+        int     ToaDo_Key       FK
+    }
+
+    Dim_NhanVien {
+        serial  NhanVien_Key    PK
+        varchar MaNhanVien
+        varchar TenNhanVien
+        varchar ChucVu
+        int     CuaHang_Key     FK
+        varchar TrangThai
+    }
+
+%% ===================================================
+%% PHẦN 2: CREDIT MART
+%% ===================================================
+
+    Dim_KhachHang {
+        serial  KhachHang_Key   PK
+        varchar TenKhachHang
+        varchar SoDienThoai
+        varchar CMND_CCCD
+        varchar NgheNghiep
+        decimal ThuNhapHangThang
+        int     DiemTinDung
+        int     SoNguoiPhuThuoc
+        text    DiaChi
+        date    NgayHieuLuc
+        date    NgayHetHieuLuc
+        boolean IsCurrent
+        int     Version
+    }
+
+    Dim_TaiSan {
+        serial  TaiSan_Key      PK
+        varchar LoaiTaiSan
+        text    MoTaChiTiet
+        decimal GiaTriDinhGia
+        text    TinhTrangBanDau
+        varchar DuongDanAnh
+    }
+
+    Dim_LoaiHinh {
+        serial  LoaiHinh_Key    PK
+        varchar TenLoaiHinh
+        varchar HinhThucTraNo
+    }
+
+    Dim_TrangThai {
+        serial  TrangThai_Key   PK
+        varchar TrangThaiKhoanVay
+        varchar NhomNo
+    }
+
+    Fact_GiaoDich {
+        bigserial GiaoDich_Key      PK
+        int       KhachHang_Key     FK
+        int       TaiSan_Key        FK
+        int       LoaiHinh_Key      FK
+        int       NgayGiaiNgan_Key  FK
+        int       NgayDaoHan_Key    FK
+        int       TrangThai_Key     FK
+        int       CuaHang_Key       FK
+        int       NhanVien_Sale_Key FK
+        int       NguoiDuyet_Key    FK
+        int       NgayDuyet_Key     FK
+        varchar   SoHopDong
+        text      LyDoTuChoi
+        decimal   SoTienMongMuon
+        decimal   SoTienDuyetVay
+        float     LaiSuat
+        decimal   PhiPhatTraTruoc
+        int       ThoiHanVay_Thang
+        int       KyTraNo_Thang
+        decimal   SoTienTraMoiKy
+    }
+
+    Fact_LichSuTrangThai {
+        bigserial LichSu_ID             PK
+        bigint    GiaoDich_Key          FK
+        int       TrangThai_Key         FK
+        int       TuNgay_Key            FK
+        int       DenNgay_Key           FK
+        int       NhanVien_ThucHien_Key FK
+        text      GhiChu
+    }
+
+    Fact_LichSuTraNo {
+        bigserial TraNo_ID          PK
+        bigint    GiaoDich_Key      FK
+        int       NgayThanhToan_Key FK
+        decimal   SoTienGocDaTra
+        decimal   SoTienLaiDaTra
+        decimal   PhiPhatTreHan
+        text      GhiChu
+    }
+
+%% ===================================================
+%% PHẦN 3: CASHFLOW MART
+%% ===================================================
+
+    Dim_QuyTien {
+        serial  QuyTien_Key     PK
+        varchar TenQuy
+        varchar LoaiQuy
+        varchar SoTaiKhoan
+        varchar TrangThai
+    }
+
+    Dim_LoaiThuChi {
+        serial  LoaiThuChi_Key  PK
+        varchar TenLoaiThuChi
+        varchar NhomThuChi
+    }
+
+    Fact_ThuChi {
+        bigserial Phieu_ID          PK
+        int       NgayThucHien_Key  FK
+        int       QuyTien_Key       FK
+        int       LoaiThuChi_Key    FK
+        bigint    GiaoDich_Key      FK
+        int       CuaHang_Key       FK
+        decimal   SoTienThu
+        decimal   SoTienChi
+        varchar   NguoiThucHien
+        varchar   ChungTuGoc
+        text      GhiChu
+    }
+
+%% ===================================================
+%% PHẦN 4: OPEX & HR MART
+%% ===================================================
+
+    Dim_KhoanMucChiPhi {
+        serial  KhoanMuc_Key    PK
+        varchar NhomChiPhi
+        varchar TenKhoanMuc
+        text    DienGiai
+        varchar TrangThai
+    }
+
+    Dim_NhaCungCap {
+        serial  NhaCungCap_Key  PK
+        varchar TenNhaCungCap
+        varchar LoaiDichVu
+        varchar SoDienThoai
+        varchar MaSoThue
+        varchar SoTaiKhoan
+    }
+
+    Dim_TaiSanNoiBo {
+        serial  TaiSanNoiBo_Key         PK
+        varchar MaTaiSan
+        varchar TenTaiSan
+        varchar LoaiTaiSan
+        date    NgayMua
+        decimal GiaTriNguyenGia
+        int     ThoiGianKhauHao_Thang
+    }
+
+    Fact_ChiPhiHoatDong {
+        bigserial ChiPhi_ID             PK
+        int       NgayGhiNhan_Key       FK
+        int       CuaHang_Key           FK
+        int       KhoanMuc_Key          FK
+        int       NhaCungCap_Key        FK
+        int       NhanVien_Tao_Key      FK
+        decimal   SoTienTruocThue
+        decimal   TienThueVAT
+        decimal   TongTienChiPhi
+        varchar   SoHoaDon
+        text      MoTaChiTiet
+        varchar   TrangThaiThanhToan
+        int       NgayThanhToan_Key     FK
+        bigint    PhieuChi_ID
+    }
+
+    Fact_KhauHao {
+        bigserial KhauHao_ID        PK
+        int       KyKeToan_Key
+        int       CuaHang_Key       FK
+        int       TaiSanNoiBo_Key   FK
+        int       KhoanMuc_Key      FK
+        decimal   GiaTriKhauHaoThang
+        decimal   GiaTriConLai
+    }
+
+    Fact_LuongThuong {
+        bigserial BangLuong_ID      PK
+        int       KyKeToan_Key
+        int       NhanVien_Key      FK
+        int       CuaHang_Key       FK
+        int       KhoanMuc_Key      FK
+        decimal   LuongCoBan
+        decimal   HoaHongGiaiNgan
+        decimal   HoaHongThuNo
+        decimal   PhuCap
+        decimal   TongThuNhap
+    }
+
+%% ===================================================
+%% PHẦN 5: WEATHER MART
+%% ===================================================
+
+    Dim_MaThoiTiet {
+        serial  MaThoiTiet_Key  PK
+        int     Weather_Code
+        varchar MoTaThoiTiet_VN
+        varchar MoTaThoiTiet_EN
+    }
+
+    Fact_ThoiTiet_HienTai {
+        bigserial Current_ID        PK
+        int       ToaDo_Key         FK
+        int       MaThoiTiet_Key    FK
+        timestamp ThoiDiemDo
+        float     NhietDo_2m
+        float     DoAm_2m
+        float     LuongMua
+        float     TocDoGio_10m
+        int       NgayGhiNhan_Key
+    }
+
+    Fact_ThoiTiet_TheoGio {
+        bigserial Hourly_ID         PK
+        int       ToaDo_Key         FK
+        timestamp ThoiDiemDuBao
+        float     NhietDo_2m
+        float     XacSuatMua
+        int       NgayDuBao_Key
+        int       GioDuBao
+    }
+
+%% ===================================================
+%% QUAN HỆ (RELATIONSHIPS)
+%% ===================================================
+
+    %% --- Conformed ---
+    Dim_CuaHang     ||--o{ Dim_NhanVien          : "có nhân viên"
+    Dim_ToaDo       ||--o{ Dim_CuaHang           : "vị trí"
+
+    %% --- Credit Mart: Fact_GiaoDich ---
+    Dim_KhachHang   ||--o{ Fact_GiaoDich         : "vay"
+    Dim_TaiSan      ||--o{ Fact_GiaoDich         : "thế chấp"
+    Dim_LoaiHinh    ||--o{ Fact_GiaoDich         : "loại hình"
+    Dim_TrangThai   ||--o{ Fact_GiaoDich         : "trạng thái HĐ"
+    Dim_CuaHang     ||--o{ Fact_GiaoDich         : "xử lý tại"
+    Dim_NhanVien    ||--o{ Fact_GiaoDich         : "sale / duyệt"
+    Dim_ThoiGian    ||--o{ Fact_GiaoDich         : "ngày giải ngân/đáo hạn"
+
+    %% --- Credit Mart: Fact phụ ---
+    Fact_GiaoDich   ||--o{ Fact_LichSuTrangThai  : "có lịch sử TT"
+    Dim_TrangThai   ||--o{ Fact_LichSuTrangThai  : "trạng thái"
+    Dim_ThoiGian    ||--o{ Fact_LichSuTrangThai  : "từ ngày / đến ngày"
+    Dim_NhanVien    ||--o{ Fact_LichSuTrangThai  : "người thực hiện"
+
+    Fact_GiaoDich   ||--o{ Fact_LichSuTraNo      : "có lịch sử trả nợ"
+    Dim_ThoiGian    ||--o{ Fact_LichSuTraNo      : "ngày thanh toán"
+
+    %% --- Cashflow Mart ---
+    Dim_ThoiGian    ||--o{ Fact_ThuChi           : "ngày thực hiện"
+    Dim_QuyTien     ||--o{ Fact_ThuChi           : "quỹ tiền"
+    Dim_LoaiThuChi  ||--o{ Fact_ThuChi           : "loại thu/chi"
+    Fact_GiaoDich   ||--o{ Fact_ThuChi           : "thuộc HĐ"
+    Dim_CuaHang     ||--o{ Fact_ThuChi           : "tại cửa hàng"
+
+    %% --- OPEX & HR Mart ---
+    Dim_ThoiGian    ||--o{ Fact_ChiPhiHoatDong   : "ngày ghi nhận"
+    Dim_CuaHang     ||--o{ Fact_ChiPhiHoatDong   : "tại cửa hàng"
+    Dim_KhoanMucChiPhi ||--o{ Fact_ChiPhiHoatDong : "khoản mục"
+    Dim_NhaCungCap  ||--o{ Fact_ChiPhiHoatDong   : "nhà cung cấp"
+    Dim_NhanVien    ||--o{ Fact_ChiPhiHoatDong   : "người tạo"
+
+    Dim_CuaHang     ||--o{ Fact_KhauHao          : "tại cửa hàng"
+    Dim_TaiSanNoiBo ||--o{ Fact_KhauHao          : "tài sản nội bộ"
+    Dim_KhoanMucChiPhi ||--o{ Fact_KhauHao       : "khoản mục"
+
+    Dim_NhanVien    ||--o{ Fact_LuongThuong      : "nhân viên"
+    Dim_CuaHang     ||--o{ Fact_LuongThuong      : "tại cửa hàng"
+    Dim_KhoanMucChiPhi ||--o{ Fact_LuongThuong   : "khoản mục"
+
+    %% --- Weather Mart ---
+    Dim_ToaDo       ||--o{ Fact_ThoiTiet_HienTai : "tọa độ"
+    Dim_MaThoiTiet  ||--o{ Fact_ThoiTiet_HienTai : "mã thời tiết"
+    Dim_ToaDo       ||--o{ Fact_ThoiTiet_TheoGio  : "tọa độ"

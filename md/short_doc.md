@@ -14,7 +14,9 @@ api docs:
 http://127.0.0.1:8000/docs
 http://127.0.0.1:8000/redoc  (ưu tiên)
 
-truy cập database qua docker: docker exec -it dwh-postgres psql -U admin -d postgres
+truy cập database qua docker: 
+
+docker exec -it postgres-credit psql -U admin -d credit_control
 
 các lệnh thông dụng:
     - \l: Liệt kê tất cả các Databases hiện có trên server.

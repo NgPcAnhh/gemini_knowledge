@@ -63,8 +63,7 @@ function initRevenueCharts() {
         data: {
             labels: ['T1', 'T2', 'T3', 'T4', 'T5'],
             datasets: [
-                { label: 'Lợi suất (%)', data: [18.2, 18.5, 17.8, 18.1, 17.6], borderColor: '#00a651', tension: 0.3 },
-                { label: 'Chi phí vốn (%)', data: [6.2, 6.5, 6.1, 6.3, 6.2], borderColor: '#f59e0b', tension: 0.3 }
+                { label: 'Chi phí vốn (%)', data: [6.2, 6.5, 6.1, 6.3, 6.2], borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.1)', fill: true, tension: 0.3 }
             ]
         },
         options: {
