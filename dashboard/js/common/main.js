@@ -1,27 +1,28 @@
 // js/common/main.js
 
 async function switchTab(tabId, element) {
-    // Cập nhật UI navigation
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    if (element) {
-        element.classList.add('active');
-    }
+    if (element) element.classList.add('active');
 
-    // Load nội dung HTML
     const container = document.getElementById('main-content-container');
     try {
-        const response = await fetch(`html/${tabId}.html`);
-        if (!response.ok) throw new Error('Network response was not ok');
+        const response = await fetch(`html/${tabId}.html`, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`Cannot fetch html/${tabId}.html`);
         const html = await response.text();
         container.innerHTML = html;
-        
-        // Khởi tạo các sự kiện giao diện tĩnh (nếu có) sau khi render HTML
+
         initDraggableFAB();
 
-        // Tùy theo tab mà khởi tạo biểu đồ tương ứng
         if (tabId === 'tab-realtime') {
             if (typeof initVietnamMap === 'function') initVietnamMap();
             if (typeof initRealtimeCharts === 'function') initRealtimeCharts();
+
+            if (typeof window.bootRealtimeDashboard === 'function') {
+                window.bootRealtimeDashboard();
+            }
+            if (window.latestRealtimePayload && typeof window.applyRealtimeSnapshot === 'function') {
+                window.applyRealtimeSnapshot(window.latestRealtimePayload);
+            }
         } else if (tabId === 'tab-revenue') {
             if (typeof initRevenueCharts === 'function') initRevenueCharts();
         } else if (tabId === 'tab-risk') {
@@ -30,63 +31,61 @@ async function switchTab(tabId, element) {
             if (typeof initCustomerCharts === 'function') initCustomerCharts();
         }
 
+        setTimeout(() => {
+            if (window._vnMap && typeof window._vnMap.invalidateSize === 'function') {
+                window._vnMap.invalidateSize();
+            }
+        }, 300);
     } catch (error) {
         console.error('Lỗi khi tải tab:', error);
-        container.innerHTML = `<div style="padding: 20px; color: var(--danger);">Lỗi khi tải nội dung tab. Chắc chắn bạn đang chạy ứng dụng qua Local Server (http://) chứ không phải file://</div>`;
+        container.innerHTML = `<div style="padding:20px;color:var(--danger);">Lỗi khi tải nội dung tab. Hãy chạy dashboard qua local server/http, không mở bằng file://</div>`;
     }
 }
 
-// Floating Filter Toggle
 function toggleCardFilter(panelId) {
     const panel = document.getElementById(panelId);
     if (!panel) return;
     const overlay = panel.closest('.filter-overlay');
-    if (overlay) {
-        overlay.classList.toggle('active');
-    }
+    if (overlay) overlay.classList.toggle('active');
 }
 
-// Draggable FAB Logic
 function initDraggableFAB() {
     const buttons = document.querySelectorAll('.floating-filter-btn');
     buttons.forEach(btn => {
-        // Tránh gắn lại event nhiều lần nếu đã gắn
         if (btn.hasAttribute('data-fab-init')) return;
         btn.setAttribute('data-fab-init', 'true');
 
         let isDragging = false;
         let startX, startY, initialX, initialY;
-        let dragThreshold = 5; // pixels to distinguish click from drag
+        const dragThreshold = 5;
 
         btn.addEventListener('mousedown', (e) => {
             isDragging = false;
             startX = e.clientX;
             startY = e.clientY;
-            
+
             const rect = btn.getBoundingClientRect();
             initialX = rect.left;
             initialY = rect.top;
 
-            const onMouseMove = (e) => {
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
-                
+            const onMouseMove = (moveEvt) => {
+                const dx = moveEvt.clientX - startX;
+                const dy = moveEvt.clientY - startY;
+
                 if (Math.abs(dx) > dragThreshold || Math.abs(dy) > dragThreshold) {
                     isDragging = true;
-                    // Switch to top/left for positioning
                     btn.style.bottom = 'auto';
                     btn.style.right = 'auto';
-                    btn.style.left = (initialX + dx) + 'px';
-                    btn.style.top = (initialY + dy) + 'px';
+                    btn.style.left = `${initialX + dx}px`;
+                    btn.style.top = `${initialY + dy}px`;
                 }
             };
 
             const onMouseUp = () => {
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mouseup', onMouseUp);
-                
+
                 if (!isDragging) {
-                    // Only toggle filter if we didn't drag
                     const panelId = btn.getAttribute('data-panel');
                     toggleCardFilter(panelId);
                 }
@@ -98,11 +97,11 @@ function initDraggableFAB() {
     });
 }
 
-// Sidebar toggle
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const icon = document.getElementById('toggleIcon');
     sidebar.classList.toggle('collapsed');
+
     if (sidebar.classList.contains('collapsed')) {
         icon.classList.remove('fa-angles-left');
         icon.classList.add('fa-angles-right');
@@ -110,30 +109,32 @@ function toggleSidebar() {
         icon.classList.remove('fa-angles-right');
         icon.classList.add('fa-angles-left');
     }
-    // Invalidate Leaflet map size after transition
-    setTimeout(() => { if (window._vnMap) window._vnMap.invalidateSize(); }, 350);
+
+    setTimeout(() => {
+        if (window._vnMap) window._vnMap.invalidateSize();
+    }, 350);
 }
 
 function refreshData(btn) {
-    btn.classList.add('spin');
-    setTimeout(() => btn.classList.remove('spin'), 800);
+    if (btn) btn.classList.add('spin');
+    if (typeof window.refreshRealtimeSnapshot === 'function') {
+        window.refreshRealtimeSnapshot();
+    }
+    setTimeout(() => {
+        if (btn) btn.classList.remove('spin');
+    }, 800);
 }
 
-// Feed filtering
 function filterFeed(type, element) {
     document.querySelectorAll('.feed-tab').forEach(el => el.classList.remove('active'));
-    element.classList.add('active');
+    if (element) element.classList.add('active');
     document.querySelectorAll('.feed-item').forEach(item => {
-        if(type === 'all' || item.getAttribute('data-type') === type) {
-            item.classList.remove('hidden');
-        } else {
-            item.classList.add('hidden');
-        }
+        if (type === 'all' || item.getAttribute('data-type') === type) item.classList.remove('hidden');
+        else item.classList.add('hidden');
     });
 }
 
-window.onload = function() {
-    // Tải tab mặc định khi trang web vừa tải xong
+window.onload = function () {
     const defaultActiveNav = document.querySelector('.nav-item.active');
     switchTab('tab-realtime', defaultActiveNav);
 };

@@ -1,71 +1,121 @@
 // js/realtime/charts.js
 
+function destroyRealtimeCharts() {
+    if (!window.realtimeCharts) return;
+    Object.values(window.realtimeCharts).forEach(chart => {
+        if (chart && typeof chart.destroy === 'function') {
+            try { chart.destroy(); } catch (_) {}
+        }
+    });
+    window.realtimeCharts = null;
+}
+
 function initRealtimeCharts() {
-    new Chart(document.getElementById('dailyStatusBar').getContext('2d'), {
+    destroyRealtimeCharts();
+
+    const statusCanvas = document.getElementById('dailyStatusBar');
+    const productCanvas = document.getElementById('customerProductDoughnut');
+    const lineCanvas = document.getElementById('realtimeLineChart');
+    const radarCanvas = document.getElementById('riskRadarChart');
+
+    if (!statusCanvas || !productCanvas || !lineCanvas || !radarCanvas) return;
+
+    const statusChart = new Chart(statusCanvas.getContext('2d'), {
         type: 'bar',
         data: {
             labels: ['Quá hạn', 'Chấp thuận', 'Từ chối'],
-            datasets: [{
-                data: [45, 210, 32],
-                backgroundColor: ['#ffc20e', '#00a651', '#ef4444'],
-                borderRadius: 4
-            }]
+            datasets: [{ data: [0, 0, 0], backgroundColor: ['#ffc20e', '#00a651', '#ef4444'], borderRadius: 4 }]
         },
         options: {
+            animation: { duration: 250 },
             plugins: { legend: { display: false } },
             scales: { y: { beginAtZero: true, ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 9 } } } }
         }
     });
 
-    new Chart(document.getElementById('customerProductDoughnut').getContext('2d'), {
+    const productChart = new Chart(productCanvas.getContext('2d'), {
         type: 'doughnut',
-        data: { 
-            labels: ['Mới (XM)', 'Cũ (XM)', 'Mới (Ô tô)', 'Cũ (Ô tô)'], 
-            datasets: [{ 
-                data: [120, 350, 45, 110], 
-                backgroundColor: ['#00a651', '#34d399', '#3b82f6', '#93c5fd'], 
-                borderWidth: 0 
-            }] 
+        data: {
+            labels: ['Xe máy', 'Ô tô', 'Điện thoại/Laptop', 'Bất động sản', 'Không TSĐB/Khác'],
+            datasets: [{ data: [0, 0, 0, 0, 0], backgroundColor: ['#00a651', '#34d399', '#3b82f6', '#93c5fd', '#64748b'], borderWidth: 0 }]
         },
-        options: { 
-            cutout: '55%', 
-            plugins: { 
-                legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 9 }, padding: 6 } }, 
-                centerText: { mainText: '625', subText: 'Hồ sơ' } 
-            } 
+        options: {
+            animation: { duration: 250 },
+            cutout: '55%',
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 9 }, padding: 6 } },
+                centerText: { mainText: '0', subText: 'Tài sản' }
+            }
         }
     });
 
-    new Chart(document.getElementById('realtimeLineChart').getContext('2d'), {
+    const lineChart = new Chart(lineCanvas.getContext('2d'), {
         type: 'line',
         data: {
-            labels: ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00'],
+            labels: [],
             datasets: [
-                { label: 'Giải ngân', data: [12,25,45,60,20,30,42,55], borderColor: '#00a651', backgroundColor: 'rgba(0, 166, 81, 0.1)', borderWidth: 2, fill: true, tension: 0.4 },
-                { label: 'Thu nợ', data: [8,15,22,35,40,25,30,48], borderColor: '#ffc20e', backgroundColor: 'rgba(255, 194, 14, 0.1)', borderWidth: 2, fill: true, tension: 0.4 }
+                { label: 'Giải ngân', data: [], borderColor: '#00a651', backgroundColor: 'rgba(0, 166, 81, 0.1)', borderWidth: 2, fill: true, tension: 0.4 },
+                { label: 'Thu nợ', data: [], borderColor: '#ffc20e', backgroundColor: 'rgba(255, 194, 14, 0.1)', borderWidth: 2, fill: true, tension: 0.4 }
             ]
         },
-        options: { 
-            plugins: { 
-                legend: { position: 'top' },
-                tooltip: { callbacks: { label: function(context) { return context.dataset.label + ': ' + currencyFormatter(context.parsed.y); } } }
-            }, 
-            scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return value + 'M'; } } } } 
+        options: {
+            animation: { duration: 250 },
+            plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y}M` } } },
+            scales: { y: { beginAtZero: true, ticks: { callback: value => `${value}M` } } }
         }
     });
 
-    new Chart(document.getElementById('riskRadarChart').getContext('2d'), {
+    const radarChart = new Chart(radarCanvas.getContext('2d'), {
         type: 'radar',
         data: {
-            labels: ['Thời tiết', 'Kẹt xe', 'Hụt thu', 'DTI cao', 'LTV cao', 'Fraud'],
-            datasets: [{
-                label: 'Rủi ro',
-                data: [90, 75, 80, 50, 45, 20],
-                backgroundColor: 'rgba(239, 68, 68, 0.2)',
-                borderColor: '#ef4444',
-                pointBackgroundColor: '#ef4444'
-            }]
+            labels: ['Thời tiết', 'PAR 1+', 'Trả chậm', 'Reject DTI', 'Reject LTV', 'Fraud'],
+            datasets: [{ label: 'Rủi ro', data: [0, 0, 0, 0, 0, 0], backgroundColor: 'rgba(239, 68, 68, 0.2)', borderColor: '#ef4444', pointBackgroundColor: '#ef4444' }]
         },
-        options: { scales: { r: { angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { font: {size: 9} }, ticks: { display: false, min: 0, max: 100 } } }, plugins: { legend: { display: false } } }
+        options: {
+            animation: { duration: 250 },
+            scales: { r: { min: 0, max: 100, angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { font: { size: 9 } }, ticks: { display: false } } },
+            plugins: { legend: { display: false } }
+        }
     });
+
+    window.realtimeCharts = { statusChart, productChart, lineChart, radarChart };
+
+    if (window.latestRealtimePayload) updateRealtimeCharts(window.latestRealtimePayload);
+}
+
+function normalizeArray(values, length) {
+    const arr = Array.isArray(values) ? values.slice(0, length) : [];
+    while (arr.length < length) arr.push(0);
+    return arr.map(v => Number(v || 0));
+}
+
+function updateRealtimeCharts(payload) {
+    if (!window.realtimeCharts || !payload) return;
+
+    const { statusChart, productChart, lineChart, radarChart } = window.realtimeCharts;
+
+    if (payload.approval_bar && statusChart) {
+        statusChart.data.datasets[0].data = normalizeArray(payload.approval_bar, 3);
+        statusChart.update();
+    }
+
+    if (payload.product_mix && productChart) {
+        const data = normalizeArray(payload.product_mix, 5);
+        productChart.data.datasets[0].data = data;
+        const total = data.reduce((sum, v) => sum + v, 0);
+        if (productChart.options.plugins.centerText) productChart.options.plugins.centerText.mainText = String(total);
+        productChart.update();
+    }
+
+    if (payload.hourly && lineChart) {
+        lineChart.data.labels = payload.hourly.labels || [];
+        lineChart.data.datasets[0].data = payload.hourly.disbursement || [];
+        lineChart.data.datasets[1].data = payload.hourly.collection || [];
+        lineChart.update();
+    }
+
+    if (payload.risk_radar && radarChart) {
+        radarChart.data.datasets[0].data = normalizeArray(payload.risk_radar, 6);
+        radarChart.update();
+    }
 }

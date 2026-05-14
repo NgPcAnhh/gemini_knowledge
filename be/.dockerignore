@@ -1,0 +1,14 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.git/
+.gitignore
+.dockerignore
+Dockerfile*
+docker-compose*.yaml
+docker-compose*.yml
+airflow/logs/
+*.zip

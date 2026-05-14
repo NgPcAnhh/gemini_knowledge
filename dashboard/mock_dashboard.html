@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -764,7 +764,7 @@
             cities.forEach(c => {
                 const d = provinceRisk[c.key] || { risk: 'low', weather: 'N/A', loans: '0', impact: '0%', temp: 'N/A' };
                 const color = getRiskColor(d.risk);
-                const marker = L.circleMarker([c.lat, c.lng], { radius: 7, fillColor: color, color: color, weight: 2, opacity: 0.9, fillOpacity: 0.6 }).addTo(map);
+                const marker = L.circleMarker([c.lat, c.lng], { radius: 5, fillColor: color, color: color, weight: 2, opacity: 0.9, fillOpacity: 0.6 }).addTo(map);
                 marker.bindTooltip(
                     `<b>${c.name}</b><br>` +
                     `<span style='color:#94a3b8'>Thời tiết:</span> ${d.weather} (${d.temp})<br>` +

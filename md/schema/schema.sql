@@ -1,3 +1,12 @@
+create schema public;
+
+-- ===================================================================
+-- SCHEMA TỔ CHỨC TÍN DỤNG - HỆ THỐNG QUẢN LÝ QUY TRÌNH CHO VAY
+-- Phiên bản: 2.0
+-- Mô tả: Chạy một lần để tạo toàn bộ schema theo đúng thứ tự dependency
+-- ===================================================================
+
+
 -- ===================================================================
 -- PHẦN 1: CÁC CHIỀU DÙNG CHUNG (CONFORMED DIMENSIONS)
 -- Phải tạo trước vì được tham chiếu bởi hầu hết các bảng khác
@@ -39,6 +48,7 @@ CREATE TABLE Dim_CuaHang (
     TenCuaHang      VARCHAR(100)    NOT NULL,
     DiaChi          TEXT,
     KhuVuc          VARCHAR(50),            -- VD: Hà Nội, TP.HCM
+    HangCuaHang     VARCHAR(10),            -- A+, A, B, C, D
     NgayKhaiTruong  DATE,
     TrangThai       VARCHAR(20)     DEFAULT 'Hoạt động',
     ToaDo_Key       INT,

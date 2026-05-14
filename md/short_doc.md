@@ -8,6 +8,8 @@ env:
 initialize:
 uvicorn app.main:app --reload
 
+/dashboard: python -m http.server 5500
+
 gemini cli: gemini
 
 api docs:

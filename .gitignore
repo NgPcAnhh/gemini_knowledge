@@ -1,0 +1,35 @@
+# Python & Virtual Environments
+.venv/
+venv/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+.python-version
+
+# IDEs & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker & Environment Variables
+.env
+.env.*
+!.env.example
+docker-compose.override.yml
+
+# Logs & Temporary Files
+*.log
+logs/
+tmp/
+temp/
+
+# Airflow specific
+be/airflow/logs/
+be/airflow/downloads/
+be/airflow/unittest.cfg
+
+# OS generated files
+.DS_Store
+Thumbs.db
