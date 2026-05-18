@@ -53,10 +53,10 @@ PG_CONFIG = {
 # ============================================================
 # VOLUME BUSINESS
 # ============================================================
-DEFAULT_DAILY_MIN = int(os.getenv("DAILY_MIN", "1000"))
-DEFAULT_DAILY_MAX = int(os.getenv("DAILY_MAX", "3000"))
+DEFAULT_DAILY_MIN = int(os.getenv("DAILY_MIN", "400"))
+DEFAULT_DAILY_MAX = int(os.getenv("DAILY_MAX", "2400"))
 DEFAULT_HOURLY_MIN = int(os.getenv("HOURLY_MIN", "20"))
-DEFAULT_HOURLY_MAX = int(os.getenv("HOURLY_MAX", "120"))
+DEFAULT_HOURLY_MAX = int(os.getenv("HOURLY_MAX", "100"))
 
 ACTIVE_HOURS = list(range(8, 22))
 
@@ -246,7 +246,7 @@ REPAYMENT_BEHAVIOR = {
 }
 
 # Tần suất thanh toán so với hợp đồng phát sinh.
-DEFAULT_PAYMENT_RATIO = float(os.getenv("PAYMENT_RATIO", "0.55"))
+DEFAULT_PAYMENT_RATIO = float(os.getenv("PAYMENT_RATIO", "0.75"))
 
 # ============================================================
 # DIM TRẠNG THÁI / LOẠI THU CHI
@@ -304,3 +304,4 @@ WEATHER_CODES = [
     {"code": 65, "desc": "Mưa to", "risk": "high"},
     {"code": 95, "desc": "Dông", "risk": "high"},
 ]
+

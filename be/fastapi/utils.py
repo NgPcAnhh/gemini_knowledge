@@ -97,6 +97,8 @@ def _feed_item(
     badge: str,
     feed_type: str,
     event_id: Optional[str] = None,
+    loan_type: Optional[str] = None,
+    extra_value: Optional[str] = None,
 ) -> dict:
     row = {
         "time": time_str,
@@ -108,6 +110,10 @@ def _feed_item(
     }
     if event_id:
         row["event_id"] = event_id
+    if loan_type:
+        row["loan_type"] = loan_type
+    if extra_value is not None:
+        row["extra_value"] = extra_value
     return row
 
 
@@ -116,6 +122,8 @@ def format_event_for_ui(event: dict) -> Optional[dict]:
     payload = event.get("payload") or {}
     event_time = event.get("event_time")
     event_id = event.get("event_id")
+    
+    asset_type = payload.get('TenLoaiTaiSan') or payload.get('LoaiTaiSan') or payload.get('TenLoaiHinh') or payload.get('LoaiHinhVay')
 
     if event_time:
         try:
@@ -134,8 +142,9 @@ def format_event_for_ui(event: dict) -> Optional[dict]:
             title="GIẢI NGÂN",
             detail=f"{contract} — {amt:.1f}M",
             badge="success",
-            feed_type="info",
+            feed_type="txn",
             event_id=event_id,
+            loan_type=asset_type,
         )
 
     if event_type == "repayment_paid":
@@ -152,8 +161,9 @@ def format_event_for_ui(event: dict) -> Optional[dict]:
             title="THU NỢ" if not late else "THU NỢ (TRỄ)",
             detail=f"{contract} — {amt:.1f}M",
             badge="warning" if late else "success",
-            feed_type="alert",
+            feed_type="alert" if late else "txn",
             event_id=event_id,
+            loan_type=asset_type,
         )
 
     if event_type == "loan_application_created":
@@ -162,8 +172,9 @@ def format_event_for_ui(event: dict) -> Optional[dict]:
             title="HỒ SƠ MỚI",
             detail=f"{payload.get('SoHopDong') or ''} — {payload.get('TenKhachHang') or ''}".strip(" —"),
             badge="warning",
-            feed_type="txn",
+            feed_type="info",
             event_id=event_id,
+            loan_type=asset_type,
         )
 
     if event_type == "loan_approved":
@@ -173,8 +184,9 @@ def format_event_for_ui(event: dict) -> Optional[dict]:
             title="PHÊ DUYỆT",
             detail=f"{payload.get('SoHopDong') or ''} — {amt:.1f}M",
             badge="success",
-            feed_type="info",
+            feed_type="txn",
             event_id=event_id,
+            loan_type=asset_type,
         )
 
     if event_type == "loan_rejected":
@@ -185,6 +197,7 @@ def format_event_for_ui(event: dict) -> Optional[dict]:
             badge="danger",
             feed_type="alert",
             event_id=event_id,
+            loan_type=asset_type,
         )
 
     if event_type == "weather_updated":
@@ -202,6 +215,8 @@ def format_event_for_ui(event: dict) -> Optional[dict]:
         detail = f"{loc}: {desc}" + (f" ({tail})" if tail else "")
         title = "THỜI TIẾT"
         badge = "danger" if risk == "high" else ("warning" if risk == "medium" else "success")
+        temp = payload.get("NhietDo")
+        extra = f"{temp}°C" if temp is not None else None
         return _feed_item(
             time_str=time_str,
             title=title,
@@ -209,6 +224,7 @@ def format_event_for_ui(event: dict) -> Optional[dict]:
             badge=badge,
             feed_type="weather",
             event_id=event_id,
+            extra_value=extra,
         )
 
     if event_type == "loan_status_changed":
@@ -219,8 +235,9 @@ def format_event_for_ui(event: dict) -> Optional[dict]:
             title="TRẠNG THÁI KHOẢN VAY",
             detail=f"{payload.get('SoHopDong') or ''}: {payload.get('TrangThaiCu') or '?'} → {new_st or '?'}",
             badge="danger" if bad else "warning",
-            feed_type="alert" if bad else "info",
+            feed_type="alert" if bad else "txn",
             event_id=event_id,
+            loan_type=asset_type,
         )
 
     if event_type == "customer_created":

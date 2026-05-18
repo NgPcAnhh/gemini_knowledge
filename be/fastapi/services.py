@@ -17,7 +17,7 @@ from utils import (
 
 logger = logging.getLogger("f88-realtime-services")
 
-FEED_MAX = 50
+FEED_MAX = 1000
 
 LATE_HANHVI = ("late_1_10", "late_11_30", "late_30_plus", "bad_debt")
 
@@ -63,13 +63,25 @@ def _refresh_risk_radar_state(data: Dict[str, Any]) -> None:
 def _update_map_weather(data: Dict[str, Any], payload: dict) -> None:
     risk_raw = (payload.get("risk") or "low").lower()
     w = "high" if risk_raw == "high" else ("medium" if risk_raw == "medium" else "low")
-    key = payload.get("MaCuaHang") or payload.get("CuaHang_Key")
-    if not key:
-        return
-    for item in data.get("map", []):
-        if str(item.get("key")) == str(key):
-            item["weather_risk"] = w
+    
+    # Ưu tiên cập nhật theo Khu vực nếu có (để update hàng loạt chi nhánh trong tỉnh)
+    kv = payload.get("KhuVuc") or payload.get("TenKhuVuc")
+    if kv:
+        found_any = False
+        for item in data.get("map", []):
+            if item.get("area") == kv:
+                item["weather_risk"] = w
+                found_any = True
+        if found_any:
             return
+
+    # Nếu không tìm thấy theo khu vực hoặc payload không có khu vực, cập nhật theo MaCuaHang
+    key = payload.get("MaCuaHang") or payload.get("CuaHang_Key")
+    if key:
+        for item in data.get("map", []):
+            if str(item.get("key")) == str(key):
+                item["weather_risk"] = w
+                return
 
 
 def _increment_reject_radar(rc: Dict[str, Any], payload: dict) -> None:
@@ -101,15 +113,7 @@ def compute_realtime_snapshot() -> Dict[str, Any]:
         latest_date = (dict_cur.fetchone() or {}).get("max_d")
         use_cal = os.getenv("SNAPSHOT_USE_CALENDAR_TODAY", "1") == "1"
         if use_cal:
-            dict_cur.execute(
-                """
-                SELECT COUNT(*) AS c FROM Raw_Staging_Events
-                WHERE COALESCE(event_time, ingestion_time)::date = %s
-                """,
-                (calendar_today,),
-            )
-            has_today = safe_int((dict_cur.fetchone() or {}).get("c")) > 0
-            target_date = calendar_today if has_today else (latest_date or calendar_today)
+            target_date = calendar_today
         else:
             target_date = latest_date if latest_date else calendar_today
         target_date_str = target_date.strftime("%Y-%m-%d")
@@ -224,9 +228,9 @@ def compute_realtime_snapshot() -> Dict[str, Any]:
             SELECT event_id, event_type, payload, COALESCE(event_time, ingestion_time) AS time
             FROM Raw_Staging_Events
             WHERE COALESCE(event_time, ingestion_time)::date = %s
-              AND event_type IN ('loan_disbursed', 'repayment_paid', 'loan_application_created', 'loan_approved', 'loan_rejected')
+              AND event_type IN ('loan_disbursed', 'repayment_paid', 'loan_application_created', 'loan_approved', 'loan_rejected', 'weather_updated')
             ORDER BY time DESC
-            LIMIT 40
+            LIMIT 2400
             """,
             (target_date,),
         )

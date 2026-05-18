@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from state import state
 from services import process_event_update, compute_realtime_snapshot
+from dashboard_queries import get_revenue_data, get_risk_data, get_customer_data
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("f88-realtime-api")
@@ -56,6 +57,21 @@ async def get_snapshot():
     if not state.data.get("active_date"):
         state.data = await asyncio.to_thread(compute_realtime_snapshot)
     return state.data
+
+@app.get("/api/dashboard/revenue")
+async def get_revenue_dashboard():
+    data = await asyncio.to_thread(get_revenue_data)
+    return data
+
+@app.get("/api/dashboard/risk")
+async def get_risk_dashboard():
+    data = await asyncio.to_thread(get_risk_data)
+    return data
+
+@app.get("/api/dashboard/customer")
+async def get_customer_dashboard():
+    data = await asyncio.to_thread(get_customer_data)
+    return data
 
 @app.websocket("/ws/realtime")
 async def websocket_endpoint(websocket: WebSocket):

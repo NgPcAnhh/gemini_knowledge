@@ -9,7 +9,7 @@
                         <span class="stat-title">Giải ngân hôm nay</span>
                         <div class="stat-value"><span id="stat-disbursement">0M</span> <span class="stat-trend trend-up" id="stat-disbursement-trend">+0%</span></div>
                         <div class="threshold-bar"><div class="threshold-fill bg-success" id="stat-disbursement-bar" style="width: 0%"></div></div>
-                        <a href="#" class="quick-action"><i class="fa-solid fa-magnifying-glass"></i> Xem chi tiết HĐ</a>
+                        <a href="javascript:void(0)" class="quick-action" onclick="openEventListModal('disbursed')"><i class="fa-solid fa-magnifying-glass"></i> Xem chi tiết HĐ</a>
                     </div>
                     <div class="stat-icon icon-green"><i class="fa-solid fa-money-bill-wave"></i></div>
                 </div>
@@ -18,7 +18,7 @@
                         <span class="stat-title">Tổng thu hôm nay</span>
                         <div class="stat-value" style="color: var(--f88-yellow)"><span id="stat-collection">0M</span> <span class="stat-trend trend-down" id="stat-collection-trend">0%</span></div>
                         <div class="threshold-bar"><div class="threshold-fill bg-warning" id="stat-collection-bar" style="width: 0%"></div></div>
-                        <a href="#" class="quick-action"><i class="fa-solid fa-bell"></i> SMS nhắc nợ tới hạn</a>
+                        <a href="javascript:void(0)" class="quick-action" onclick="openEventListModal('repayment')"><i class="fa-solid fa-bell"></i> Danh sách thu nợ</a>
                     </div>
                     <div class="stat-icon icon-yellow"><i class="fa-solid fa-hand-holding-dollar"></i></div>
                 </div>
@@ -36,7 +36,7 @@
                         <span class="stat-title">Tỷ lệ nợ xấu (Lũy kế)</span>
                         <div class="stat-value"><span id="stat-par1">0%</span> <span class="stat-trend trend-down" id="stat-par1-trend">0%</span></div>
                         <div class="threshold-bar"><div class="threshold-fill bg-danger" id="stat-par1-bar" style="width: 0%"></div></div>
-                        <a href="#" class="quick-action"><i class="fa-solid fa-file-export"></i> Toàn hệ thống</a>
+                        <a href="javascript:void(0)" class="quick-action" onclick="openEventListModal('late')"><i class="fa-solid fa-triangle-exclamation"></i> Chi tiết nợ xấu</a>
                     </div>
                     <div class="stat-icon icon-red"><i class="fa-solid fa-chart-pie"></i></div>
                 </div>
@@ -98,6 +98,32 @@
                             <li class="feed-item" data-type="alert"><div class="feed-time">10:00</div><div class="feed-content"><div class="feed-title"><span class="badge badge-warning">RỦI RO</span> Override</div>NV duyệt ngoại lệ LTV > 60%.</div></li>
                             <li class="feed-item" data-type="weather"><div class="feed-time">09:30</div><div class="feed-content"><div class="feed-title"><span class="badge badge-success">NẮNG</span> Hà Nội trời nắng</div>Nhiệt độ 32°C. Điều kiện lý tưởng cho tài xế.</div></li>
                         </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event List Modal -->
+            <div id="eventListModal" class="modal-overlay" onclick="closeEventListModal()">
+                <div class="modal-content" onclick="event.stopPropagation()">
+                    <div class="modal-header">
+                        <h3 class="modal-title" id="modalTitle">Danh sách sự kiện</h3>
+                        <button class="modal-close" onclick="closeEventListModal()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="modalLoading" class="modal-loading">Đang tải dữ liệu...</div>
+                        <table class="modal-table" id="eventTable">
+                            <thead>
+                                <tr id="tableHeader">
+                                    <th>Thời gian</th>
+                                    <th>Sự kiện</th>
+                                    <th>Chi tiết</th>
+                                </tr>
+                            </thead>
+                            <tbody id="eventTableBody">
+                                <!-- Data rows go here -->
+                            </tbody>
+                        </table>
+                        <div id="modalNoData" class="modal-no-data" style="display: none;">Không có dữ liệu phù hợp.</div>
                     </div>
                 </div>
             </div>

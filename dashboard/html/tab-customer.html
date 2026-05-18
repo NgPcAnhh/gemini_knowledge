@@ -40,56 +40,56 @@
             <!-- 1. Top -->
             <div class="mind-map-node" style="top: 0%; left: 50%; transform: translateX(-50%);">
                 <span class="node-label">KH Active</span>
-                <div class="node-value" style="color: var(--f88-green);">4,250</div>
+                <div class="node-value" id="val-cust-active" style="color: var(--f88-green);">4,250</div>
                 <div class="node-line" style="height: 60px; width: 2px; bottom: -60px; left: 50%; transform: translateX(-50%); background: linear-gradient(to bottom, var(--f88-blue), transparent);"></div>
             </div>
 
             <!-- 2. Top Right -->
             <div class="mind-map-node" style="top: 15%; right: 5%;">
                 <span class="node-label">Tỷ lệ Tái vay</span>
-                <div class="node-value" style="color: var(--f88-green);">65%</div>
+                <div class="node-value" id="val-cust-reborrow" style="color: var(--f88-green);">65%</div>
                 <div class="node-line" style="width: 80px; height: 2px; bottom: -20px; left: -60px; transform: rotate(-145deg); background: linear-gradient(to right, transparent, var(--f88-blue));"></div>
             </div>
 
             <!-- 3. Mid Right -->
             <div class="mind-map-node" style="top: 50%; right: -2%; transform: translateY(-50%);">
                 <span class="node-label">Credit Score</span>
-                <div class="node-value" style="color: var(--f88-green);">680</div>
+                <div class="node-value" id="val-cust-credit-score" style="color: var(--f88-green);">680</div>
                 <div class="node-line" style="width: 70px; height: 2px; left: -70px; top: 50%; background: linear-gradient(to right, transparent, var(--f88-blue));"></div>
             </div>
 
             <!-- 4. Bottom Right -->
             <div class="mind-map-node" style="bottom: 15%; right: 5%;">
                 <span class="node-label">Độ tuổi TB</span>
-                <div class="node-value" style="color: var(--f88-blue);">31</div>
+                <div class="node-value" id="val-cust-avg-age" style="color: var(--f88-blue);">31</div>
                 <div class="node-line" style="width: 80px; height: 2px; top: -20px; left: -60px; transform: rotate(145deg); background: linear-gradient(to right, transparent, var(--f88-blue));"></div>
             </div>
 
             <!-- 5. Bottom -->
             <div class="mind-map-node" style="bottom: 0%; left: 50%; transform: translateX(-50%);">
                 <span class="node-label">Thời gian vay</span>
-                <div class="node-value">14th</div>
+                <div class="node-value" id="val-cust-avg-term">14th</div>
                 <div class="node-line" style="height: 60px; width: 2px; top: -60px; left: 50%; transform: translateX(-50%); background: linear-gradient(to top, var(--f88-blue), transparent);"></div>
             </div>
 
             <!-- 6. Bottom Left -->
             <div class="mind-map-node" style="bottom: 15%; left: 5%;">
                 <span class="node-label">DTI (Gánh nặng)</span>
-                <div class="node-value" style="color: var(--danger);">48%</div>
+                <div class="node-value" id="val-cust-avg-dti" style="color: var(--danger);">48%</div>
                 <div class="node-line" style="width: 80px; height: 2px; top: -20px; right: -60px; transform: rotate(-145deg); background: linear-gradient(to left, transparent, var(--f88-blue));"></div>
             </div>
 
             <!-- 7. Mid Left -->
             <div class="mind-map-node" style="top: 50%; left: -2%; transform: translateY(-50%);">
                 <span class="node-label">Thu nhập TB</span>
-                <div class="node-value" style="color: var(--f88-yellow);">520K</div>
+                <div class="node-value" id="val-cust-avg-income" style="color: var(--f88-yellow);">5.2M</div>
                 <div class="node-line" style="width: 70px; height: 2px; right: -70px; top: 50%; background: linear-gradient(to left, transparent, var(--f88-blue));"></div>
             </div>
 
             <!-- 8. Top Left -->
             <div class="mind-map-node" style="top: 15%; left: 5%;">
                 <span class="node-label">Tỷ lệ Churn</span>
-                <div class="node-value" style="color: var(--danger);">12%</div>
+                <div class="node-value" id="val-cust-churn" style="color: var(--danger);">12%</div>
                 <div class="node-line" style="width: 80px; height: 2px; bottom: -20px; right: -60px; transform: rotate(145deg); background: linear-gradient(to left, transparent, var(--f88-blue));"></div>
             </div>
 
@@ -97,9 +97,9 @@
         <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; font-size: 11px;">
             <div style="color: var(--f88-blue); font-weight: 700; margin-bottom: 4px;"><i class="fa-solid fa-lightbulb"></i> NHẬN ĐỊNH:</div>
             <div style="display: flex; gap: 15px;">
-                <span style="flex: 1;"><i class="fa-solid fa-circle-check" style="color: var(--f88-green);"></i> Nam giới, 25-35t.</span>
-                <span style="flex: 1;"><i class="fa-solid fa-triangle-exclamation" style="color: var(--danger);"></i> DTI 48% (Rủi ro).</span>
-                <span style="flex: 1;"><i class="fa-solid fa-rotate" style="color: var(--f88-yellow);"></i> Tái vay 65%.</span>
+                <span style="flex: 1;" id="val-cust-insight-age"><i class="fa-solid fa-circle-check" style="color: var(--f88-green);"></i> Nam giới, 25-35t.</span>
+                <span style="flex: 1;" id="val-cust-insight-dti"><i class="fa-solid fa-triangle-exclamation" style="color: var(--danger);"></i> DTI 48% (Rủi ro).</span>
+                <span style="flex: 1;" id="val-cust-insight-reborrow"><i class="fa-solid fa-rotate" style="color: var(--f88-yellow);"></i> Tái vay 65%.</span>
             </div>
         </div>
     </div>

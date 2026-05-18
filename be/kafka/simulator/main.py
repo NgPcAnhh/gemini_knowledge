@@ -21,6 +21,8 @@ from zoneinfo import ZoneInfo
 import psycopg2
 from faker import Faker
 
+from simulator.weather_service import WeatherService
+
 from simulator.config import (
     KAFKA_TOPICS,
     PG_CONFIG,
@@ -86,6 +88,7 @@ class BusinessSimulator:
         self.active_loans: list[ActiveLoan] = []
         self.weather_by_store: dict[str, dict] = {}
         self.event_buffer: list[dict] = []
+        self.weather_svc = WeatherService()
 
     def _topic_key(self, event: dict) -> tuple[str, dict, str | None]:
         et = event.get("event_type")
@@ -164,21 +167,31 @@ class BusinessSimulator:
             allocation[selected_stores[0]["MaCuaHang"]] = total_count
         return allocation
 
-    def _refresh_weather(self, dt: datetime, sample_ratio: float = 0.08) -> list[dict]:
+    def _refresh_weather(self, dt: datetime) -> list[dict]:
         events = []
         if not self.stores:
             return events
-        n = max(1, int(len(self.stores) * sample_ratio))
-        sample = self.dist.weighted_choices(self.stores, [1.0] * len(self.stores), n)
-        seen = set()
-        for store in sample:
-            code = store.get("MaCuaHang")
-            if code in seen:
-                continue
-            seen.add(code)
-            weather = self.dist.gen_weather(store)
-            self.weather_by_store[code] = weather
-            events.append(self.gen.gen_weather_event(dt, store, weather))
+            
+        logger.info("Fetching real-time weather from 34 APIs...")
+        prov_weather = self.weather_svc.fetch_all_weather()
+        if not prov_weather:
+            return events
+            
+        # Map tỉnh -> weather data
+        weather_map = {w["KhuVuc"]: w for w in prov_weather}
+        
+        # Cập nhật cho tất cả cửa hàng dựa trên khu vực
+        updated_kv = set()
+        for store in self.stores:
+            kv = store.get("KhuVuc")
+            if kv in weather_map:
+                w_data = weather_map[kv]
+                self.weather_by_store[store["MaCuaHang"]] = w_data
+                
+                # Emit event cho Tỉnh/Thành đó (chỉ cần 1 event đại diện cho cả tỉnh để Dashboard cập nhật)
+                if kv not in updated_kv:
+                    events.append(self.gen.gen_weather_event(dt, store, w_data))
+                    updated_kv.add(kv)
         return events
 
     def generate_contract_chain(self, dt: datetime, store: dict) -> list[dict]:
@@ -244,6 +257,7 @@ class BusinessSimulator:
                 approved_amount=decision_event["payload"]["SoTienDuyetVay"],
                 term_months=decision_event["payload"]["ThoiHanVay_Thang"],
                 employee_code=approver.get("MaNhanVien"),
+                loan_type=loan_type,
             )
             events.append(disb_event)
 
@@ -327,8 +341,8 @@ class BusinessSimulator:
         for i in range(minutes):
             dt = start_dt + timedelta(minutes=i)
 
-            if dt.minute in (0, 20, 40):
-                all_events.extend(self._refresh_weather(dt, sample_ratio=0.06))
+            if dt.minute in (0, 30):
+                all_events.extend(self._refresh_weather(dt))
 
             hourly = self._hourly_target(dt)
             per_minute_mean = hourly / 60.0

@@ -29,7 +29,14 @@ function initRealtimeCharts() {
         options: {
             animation: { duration: 250 },
             plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 9 } } } }
+            scales: { y: { beginAtZero: true, ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 9 } } } },
+            onClick: (e, activeEls) => {
+                if (activeEls.length > 0) {
+                    const idx = activeEls[0].index;
+                    const labels = ['overdue', 'approved', 'rejected'];
+                    if (typeof openEventListModal === 'function') openEventListModal(labels[idx]);
+                }
+            }
         }
     });
 
@@ -45,6 +52,13 @@ function initRealtimeCharts() {
             plugins: {
                 legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 9 }, padding: 6 } },
                 centerText: { mainText: '0', subText: 'Tài sản' }
+            },
+            onClick: (e, activeEls) => {
+                if (activeEls.length > 0) {
+                    const idx = activeEls[0].index;
+                    const labels = ['Xe máy', 'Ô tô', 'Điện thoại/Laptop', 'Bất động sản', 'Khác'];
+                    if (typeof openEventListModal === 'function') openEventListModal('product', labels[idx]);
+                }
             }
         }
     });

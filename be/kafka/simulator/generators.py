@@ -249,6 +249,7 @@ class EventGenerator:
         approved_amount: float,
         term_months: int,
         employee_code: str,
+        loan_type: str = "",
     ) -> dict:
         method = self.dist.weighted_choice(["Tiền mặt", "Chuyển khoản"], [0.52, 0.48])
         maturity_date = event_time + timedelta(days=term_months * 30)
@@ -263,6 +264,7 @@ class EventGenerator:
             "SoTienGiaiNgan": approved_amount,
             "DuNoGocBanDau": approved_amount,
             "DuNoConLai": approved_amount,
+            "TenLoaiHinh": loan_type,
             "NgayGiaiNgan": event_time.strftime("%Y%m%d"),
             "NgayDaoHan": maturity_date.strftime("%Y%m%d"),
             "PhuongThuc": method,
@@ -386,6 +388,7 @@ class EventGenerator:
             "SoTienGocDaTra": round(actual_principal, 0),
             "SoTienLaiDaTra": round(actual_interest, 0),
             "PhiPhatTreHan": round(late_fee, 0),
+            "TenLoaiHinh": loan.TenLoaiHinh,
             "SoDuGocTruocThanhToan": round(before, 0),
             "SoDuGocSauThanhToan": round(after, 0),
             "DuNoConLai": round(after, 0),
@@ -405,6 +408,7 @@ class EventGenerator:
             "LyDo": reason,
             "MaNhanVien": employee_code,
             "NgayThayDoi": event_time.strftime("%Y%m%d"),
+            "TenLoaiHinh": loan.TenLoaiHinh,
             "DuNoConLai": round(loan.DuNoConLai, 0),
         })
 

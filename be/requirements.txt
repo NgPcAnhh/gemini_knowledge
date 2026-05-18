@@ -5,3 +5,4 @@ redis==5.0.4
 kafka-python==2.0.2
 Faker==25.9.1
 numpy==1.26.4
+requests==2.31.0

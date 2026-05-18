@@ -1,9 +1,3 @@
-"""
-simulator/distributions.py
-
-Engine xác suất cho mô phỏng nghiệp vụ.
-"""
-
 import numpy as np
 from datetime import datetime
 

@@ -134,7 +134,24 @@
         const feedList = document.getElementById('feedList');
         if (!feedList) return;
 
-        const filtered = lastFeedData.filter(item => currentFeedFilter === 'all' || item.type === currentFeedFilter);
+        let filtered;
+        if (currentFeedFilter === 'weather') {
+            // Group weather events by province/location and only keep the latest
+            const weatherMap = new Map();
+            lastFeedData.forEach(item => {
+                if (item.type === 'weather') {
+                    // Extract location from detail "Province: Description (Rain/Wind)"
+                    const locPart = item.detail ? item.detail.split(':')[0].trim() : 'Unknown';
+                    if (!weatherMap.has(locPart)) {
+                        weatherMap.set(locPart, item);
+                    }
+                }
+            });
+            filtered = Array.from(weatherMap.values());
+        } else {
+            filtered = lastFeedData.filter(item => currentFeedFilter === 'all' || item.type === currentFeedFilter);
+        }
+
         feedList.innerHTML = '';
 
         if (filtered.length === 0) {
@@ -142,7 +159,7 @@
             return;
         }
 
-        filtered.slice(0, 30).forEach(item => {
+        filtered.slice(0, 50).forEach(item => {
             const li = document.createElement('li');
             li.className = 'feed-item';
             li.setAttribute('data-type', item.type || 'alert');
@@ -153,7 +170,8 @@
                         <span class="badge ${badgeClass(item.badge)}">${item.title || 'EVENT'}</span>
                         ${item.detail || ''}
                     </div>
-                </div>`;
+                </div>
+                ${item.extra_value ? `<div class="feed-extra">${item.extra_value}</div>` : ''}`;
             feedList.appendChild(li);
         });
         feedList.scrollTop = 0;
