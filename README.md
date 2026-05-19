@@ -9,8 +9,47 @@ Finnova Dashboard là giải pháp Lambda Architecture kết hợp luồng dữ 
 ### 1.1 Nghiệp Vụ Tài Chính Tín Dụng của Finnova
 Hệ thống quản lý toàn bộ vòng đời của các khoản vay thế chấp (xe máy, ô tô, điện thoại/laptop, bất động sản) và tín chấp với các nghiệp vụ cốt lõi:
 1. **Quản lý Hợp đồng vay (Credit Lifecycle):** Đăng ký nhu cầu vay $\rightarrow$ Định giá tài sản thế chấp $\rightarrow$ Phê duyệt/Từ chối dựa trên điểm tín dụng (Credit Score) và hệ số chi trả nợ trên thu nhập (DTI - Debt-to-Income) $\rightarrow$ Giải ngân (Disbursement) $\rightarrow$ Thu nợ (Collection) $\rightarrow$ Tất toán (Settled) hoặc Quá hạn (Overdue/NPL).
+
+#### Sơ đồ Quy trình Vòng đời Hợp đồng vay (Credit Lifecycle Workflow)
+![Quy trình Vòng đời Tín dụng Finnova](asset/credit_lifecycle_flow.png)
+
+```mermaid
+flowchart TD
+    Start([Bắt đầu]) --> Reg[1. Đăng ký Nhu cầu Vay]
+    Reg --> Val[2. Định giá Tài sản Thế chấp]
+    Val --> Check{3. Hệ thống Phê duyệt Tự động}
+    
+    Check -->|DTI > 60%| RejectDTI[Từ chối: Vượt DTI - Nợ cao]
+    Check -->|LTV > 85%| RejectLTV[Từ chối: Vượt LTV - Thiếu TSĐB]
+    Check -->|DiemTinDung < 400| RejectCredit[Từ chối: Điểm tín dụng thấp]
+    
+    Check -->|Hợp lệ| Approve[4. Phê duyệt & Giải ngân]
+    
+    Approve --> Collect[5. Thu hồi nợ & Trả nợ]
+    
+    Collect -->|Thanh toán đầy đủ| Settle[6. Tất toán khoản vay]
+    Collect -->|Trễ hạn thanh toán| Overdue[7. Quá hạn / Nhóm nợ xấu NPL]
+    
+    Overdue -->|Tính toán rủi ro| Risk[Phân tích Roll Rate & Vintage Analysis]
+    
+    RejectDTI --> End([Kết thúc])
+    RejectLTV --> End
+    RejectCredit --> End
+    Settle --> End
+    Risk --> End
+
+    style Reg fill:#1b5e20,stroke:#388e3c,stroke-width:2px,color:#fff
+    style Val fill:#0d47a1,stroke:#1976d2,stroke-width:2px,color:#fff
+    style Check fill:#e65100,stroke:#f57c00,stroke-width:2px,color:#fff
+    style Approve fill:#2e7d32,stroke:#4caf50,stroke-width:2px,color:#fff
+    style Collect fill:#006064,stroke:#00acc1,stroke-width:2px,color:#fff
+    style Settle fill:#4a148c,stroke:#8e24aa,stroke-width:2px,color:#fff
+    style Overdue fill:#b71c1c,stroke:#e53935,stroke-width:2px,color:#fff
+```
+
 2. **Quản trị Rủi ro & Thu hồi nợ:** Phân loại nợ theo các nhóm quá hạn (M0: Trong hạn, M1: 1-14 ngày quá hạn, M2: 15-30 ngày, M3+: trên 30 ngày quá hạn). Thực hiện trích lập dự phòng rủi ro (Provisioning) dựa trên rủi ro từng nhóm nợ và phân tích tỷ lệ chuyển nhóm nợ (**Roll Rate Matrix**), phân tích tổn thất lũy kế theo nhóm giải ngân (**Vintage Analysis**).
 3. **Quản trị Dòng tiền & Chi phí Hoạt động (OPEX & Payroll):** Ghi nhận dòng tiền thu/chi thực tế tại quỹ. Quản lý chi phí cố định (Mặt bằng, điện nước tại 800 cửa hàng), khấu hao tài sản văn phòng và chi phí nhân sự (lương cứng cùng hoa hồng thưởng tính động theo hiệu suất giải ngân và thu hồi nợ của từng nhân viên sale).
+
 
 ---
 
