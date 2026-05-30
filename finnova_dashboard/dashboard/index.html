@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F88 Dashboard</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Chart Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar sidebar-collapsed" id="sidebar">
+            <div class="logo">
+                <img src="assets/f88.jpg" alt="F88" class="logo-image">
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-item active" data-tab="tab-realtime">
+                    <i class="ph-fill ph-chart-line-up"></i>
+                    <span>Real-time</span>
+                </button>
+                <button class="nav-item" data-tab="tab-hieuqua">
+                    <i class="ph-fill ph-chart-bar"></i>
+                    <span>Hiệu quả<br>kinh doanh</span>
+                </button>
+                <button class="nav-item" data-tab="tab-ruiro">
+                    <i class="ph-fill ph-shield-check"></i>
+                    <span>Quản trị<br>rủi ro</span>
+                </button>
+                <button class="nav-item" data-tab="tab-chandung">
+                    <i class="ph-fill ph-user-focus"></i>
+                    <span>Chân dung<br>khách hàng</span>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="time-widget">
+                    <div class="time-label">Cập nhật lúc</div>
+                    <div class="time-value" id="current-time">10:24:36</div>
+                    <div class="date-value" id="current-date">19/05/2025</div>
+                </div>
+                <button id="sidebarToggle" class="sidebar-toggle" type="button">›</button>
+            </div>
+        </aside>
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- Tab 1: Real-time -->
+            <div id="tab-realtime" class="tab-pane active">
+                <header class="tab-header flex-between">
+                    <h1>Dashboard Real-time Campaign XKLD</h1>
+                    <div class="header-filters">
+                        <div class="filter-group">
+                            <label>Từ ngày</label>
+                            <input type="date" value="2025-05-01">
+                        </div>
+                        <div class="filter-group">
+                            <label>Đến ngày</label>
+                            <input type="date" value="2025-05-19">
+                        </div>
+                    </div>
+                </header>
+                <div class="tab-body rt-grid">
+                    <!-- Top Metrics -->
+                    <div class="rt-metrics">
+                        <div class="metric-card">
+                            <div class="metric-icon bg-green-light"><i class="ph-fill ph-file-text"></i></div>
+                            <div class="metric-info">
+                                <div class="metric-title">Số hợp đồng chấp thuận</div>
+                                <div class="metric-value">2.458</div>
+                                <div class="metric-trend text-green"><i class="ph-bold ph-caret-up"></i> 18,7% <span
+                                        class="trend-sub">vs cùng kỳ 18/05</span></div>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon bg-orange-light"><i class="ph-fill ph-x-circle"></i></div>
+                            <div class="metric-info">
+                                <div class="metric-title">Tỷ lệ từ chối</div>
+                                <div class="metric-value">12,35%</div>
+                                <div class="metric-trend text-red"><i class="ph-bold ph-caret-up"></i> 1,24 điểm % <span
+                                        class="trend-sub">vs cùng kỳ 18/05</span></div>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon bg-yellow-light"><i class="ph-fill ph-chart-line-up"></i></div>
+                            <div class="metric-info">
+                                <div class="metric-title">Biên lợi nhuận</div>
+                                <div class="metric-value">17,62%</div>
+                                <div class="metric-trend text-green"><i class="ph-bold ph-caret-up"></i> 2,18 điểm %
+                                    <span class="trend-sub">vs cùng kỳ 18/05</span></div>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon bg-green-light"><i class="ph-fill ph-wallet"></i></div>
+                            <div class="metric-info">
+                                <div class="metric-title">Tổng thu</div>
+                                <div class="metric-value">34,68 <span class="unit">tỷ VND</span></div>
+                                <div class="metric-trend text-green"><i class="ph-bold ph-caret-up"></i> 21,3% <span
+                                        class="trend-sub">vs cùng kỳ 18/05</span></div>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon bg-orange-light"><i class="ph-fill ph-coins"></i></div>
+                            <div class="metric-info">
+                                <div class="metric-title">Tổng chi</div>
+                                <div class="metric-value">18,24 <span class="unit">tỷ VND</span></div>
+                                <div class="metric-trend text-red"><i class="ph-bold ph-caret-up"></i> 12,6% <span
+                                        class="trend-sub">vs cùng kỳ 18/05</span></div>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon bg-yellow-light"><i class="ph-fill ph-clock"></i></div>
+                            <div class="metric-info">
+                                <div class="metric-title">Tỷ lệ trễ chậm</div>
+                                <div class="metric-value">4,58%</div>
+                                <div class="metric-trend text-red"><i class="ph-bold ph-caret-up"></i> 0,63 điểm % <span
+                                        class="trend-sub">vs cùng kỳ 18/05</span></div>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon bg-green-light"><i class="ph-fill ph-shield-check"></i></div>
+                            <div class="metric-info">
+                                <div class="metric-title">Tỷ lệ nợ xấu</div>
+                                <div class="metric-value">2,31%</div>
+                                <div class="metric-trend text-green"><i class="ph-bold ph-caret-down"></i> 0,32 điểm %
+                                    <span class="trend-sub">vs cùng kỳ 18/05</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Main Grid -->
+                    <div class="rt-main-content">
+                        <!-- Left Col: Map -->
+                        <div class="card map-container">
+                            <div class="card-title">Phân bổ theo khu vực</div>
+                            <div id="vietnam-map" style="width: 100%;"></div>
+                            <div class="map-legend">
+                                <div class="legend-title">Tỷ lệ nợ xấu</div>
+                                <div class="legend-item"><span class="color-box" style="background:#ef4444"></span> ≥ 4%</div>
+                                <div class="legend-item"><span class="color-box" style="background:#f97316"></span> 2% - 4%</div>
+                                <div class="legend-item"><span class="color-box" style="background:#fcd34d"></span> 1% - 2%</div>
+                                <div class="legend-item"><span class="color-box" style="background:#10b981"></span> 0.5% - 1%</div>
+                                <div class="legend-item"><span class="color-box" style="background:#059669"></span> < 0.5%</div>
+                                <div class="legend-item"><span class="color-box" style="background:#e5e7eb"></span> Không dữ liệu</div>
+                            </div>
+                            </div>
+                            <!-- Right Area -->
+                            <div class="rt-right-area">
+                                <!-- Top: 3 Doughnuts -->
+                                <div class="rt-doughnuts-row">
+                                    <div class="card">
+                                        <div class="card-title">Loại hình khoản vay</div>
+                                        <div class="chart-container"><canvas id="chart-loaihinh"></canvas></div>
+                                    </div>
+                                    <div class="card">
+                                        <div class="card-title">Tình trạng nợ</div>
+                                        <div class="chart-container"><canvas id="chart-tinhtrang"></canvas></div>
+                                    </div>
+                                    <div class="card">
+                                        <div class="card-title">Sử dụng dịch vụ</div>
+                                        <div class="chart-container"><canvas id="chart-dichvu"></canvas></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Bottom: Charts & Events -->
+                                <div class="rt-middle-row">
+                                    <!-- Left Column: Stacked Charts (50% area) -->
+                                    <div class="middle-left-col">
+                                        <div class="card line-chart-card">
+                                            <div class="card-title">Doanh thu theo thời gian (Real-time)</div>
+                                            <div class="chart-container" id="chart-doanhthu"></div>
+                                        </div>
+                                        <div class="card bar-chart-card">
+                                            <div class="card-title">Phân bổ theo mức khoản vay</div>
+                                            <div class="chart-container"><canvas id="chart-mucvay"></canvas></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Right Column: Full Height Events -->
+                                    <div class="card events-card">
+                                        <div class="card-title flex-between">Live Events <a href="#"
+                                                class="text-link">Xem tất cả</a></div>
+                                        <ul class="event-list">
+                                            <li class="event-item">
+                                                <div class="event-time">11:15:22</div>
+                                                <div class="event-icon text-green"><i class="ph-fill ph-check-circle"></i></div>
+                                                <div class="event-detail">
+                                                    <div class="event-name">Giải ngân thành công</div>
+                                                    <div class="event-loc">Thanh Hóa</div>
+                                                </div>
+                                                <div class="event-status bg-green-light text-green">Xong</div>
+                                            </li>
+                                            <li class="event-item">
+                                                <div class="event-time">11:14:45</div>
+                                                <div class="event-icon text-orange"><i class="ph-fill ph-clock"></i></div>
+                                                <div class="event-detail">
+                                                    <div class="event-name">Hồ sơ chờ đối soát</div>
+                                                    <div class="event-loc">Nghệ An</div>
+                                                </div>
+                                                <div class="event-status bg-orange-light text-orange">Chờ</div>
+                                            </li>
+                                            <li class="event-item">
+                                                <div class="event-time">11:13:10</div>
+                                                <div class="event-icon text-green"><i class="ph-fill ph-plus-circle"></i></div>
+                                                <div class="event-detail">
+                                                    <div class="event-name">Hợp đồng mới #8821</div>
+                                                    <div class="event-loc">Hà Tĩnh</div>
+                                                </div>
+                                                <div class="event-status bg-green-light text-green">Mới</div>
+                                            </li>
+                                            <li class="event-item">
+                                                <div class="event-time">11:12:05</div>
+                                                <div class="event-icon text-red"><i class="ph-fill ph-warning"></i></div>
+                                                <div class="event-detail">
+                                                    <div class="event-name">Nợ xấu nhóm 3</div>
+                                                    <div class="event-loc">Thanh Hóa</div>
+                                                </div>
+                                                <div class="event-status bg-red-light text-red">Cảnh báo</div>
+                                            </li>
+                                            <li class="event-item">
+                                                <div class="event-time">11:10:30</div>
+                                                <div class="event-icon text-green"><i class="ph-fill ph-check-circle"></i></div>
+                                                <div class="event-detail">
+                                                    <div class="event-name">Tất toán khoản vay</div>
+                                                    <div class="event-loc">Vinh - Nghệ An</div>
+                                                </div>
+                                                <div class="event-status bg-green-light text-green">Tất toán</div>
+                                            </li>
+                                            <li class="event-item">
+                                                <div class="event-time">11:08:12</div>
+                                                <div class="event-icon text-warning"><i class="ph-fill ph-clock-counter-clockwise"></i></div>
+                                                <div class="event-detail">
+                                                    <div class="event-name">Cảnh báo trễ 3 ngày</div>
+                                                    <div class="event-loc">Hà Tĩnh</div>
+                                                </div>
+                                                <div class="event-status bg-yellow-light text-warning">Trễ</div>
+                                            </li>
+                                            <li class="event-item">
+                                                <div class="event-time">11:06:50</div>
+                                                <div class="event-icon text-green"><i class="ph-fill ph-check-circle"></i></div>
+                                                <div class="event-detail">
+                                                    <div class="event-name">Duyệt hồ sơ vay #9012</div>
+                                                    <div class="event-loc">Thanh Hóa - Sầm Sơn</div>
+                                                </div>
+                                                <div class="event-status bg-green-light text-green">Duyệt</div>
+                                            </li>
+                                            <li class="event-item">
+                                                <div class="event-time">11:05:44</div>
+                                                <div class="event-icon text-green"><i class="ph-fill ph-check-circle"></i></div>
+                                                <div class="event-detail">
+                                                    <div class="event-name">Hợp đồng được duyệt</div>
+                                                    <div class="event-loc">TP.HCM</div>
+                                                </div>
+                                                <div class="event-status bg-green-light text-green">Duyệt</div>
+                                            </li>
+                                            <li class="event-item">
+                                                <div class="event-time">11:04:18</div>
+                                                <div class="event-icon text-orange"><i class="ph-fill ph-info"></i></div>
+                                                <div class="event-detail">
+                                                    <div class="event-name">Bổ sung CMND/CCCD</div>
+                                                    <div class="event-loc">Nghệ An - Quỳ Hợp</div>
+                                                </div>
+                                                <div class="event-status bg-orange-light text-orange">Bổ sung</div>
+                                            </li>
+                                            <li class="event-item">
+                                                <div class="event-time">11:02:15</div>
+                                                <div class="event-icon text-green"><i class="ph-fill ph-user-plus"></i></div>
+                                                <div class="event-detail">
+                                                    <div class="event-name">Khách hàng cài App</div>
+                                                    <div class="event-loc">Đà Nẵng</div>
+                                                </div>
+                                                <div class="event-status bg-green-light text-green">App</div>
+                                            </li>
+                                            <li class="event-item">
+                                                <div class="event-time">11:01:40</div>
+                                                <div class="event-icon text-green"><i class="ph-fill ph-check-circle"></i></div>
+                                                <div class="event-detail">
+                                                    <div class="event-name">Thu nợ định kỳ</div>
+                                                    <div class="event-loc">Hà Tĩnh - Kỳ Anh</div>
+                                                </div>
+                                                <div class="event-status bg-green-light text-green">Đã thu</div>
+                                            </li>
+                                            <li class="event-item">
+                                                <div class="event-time">11:00:00</div>
+                                                <div class="event-icon text-orange"><i class="ph-fill ph-info"></i></div>
+                                                <div class="event-detail">
+                                                    <div class="event-name">Yêu cầu bổ sung ảnh</div>
+                                                    <div class="event-loc">Hà Nội</div>
+                                                </div>
+                                                <div class="event-status bg-orange-light text-orange">Bổ sung</div>
+                                            </li>
+                                            <li class="event-item">
+                                                <div class="event-time">10:58:30</div>
+                                                <div class="event-icon text-green"><i class="ph-fill ph-check-circle"></i></div>
+                                                <div class="event-detail">
+                                                    <div class="event-name">Giải ngân 50tr</div>
+                                                    <div class="event-loc">Thanh Hóa</div>
+                                                </div>
+                                                <div class="event-status bg-green-light text-green">Xong</div>
+                                            </li>
+                                            <li class="event-item">
+                                                <div class="event-time">10:57:12</div>
+                                                <div class="event-icon text-red"><i class="ph-fill ph-warning-circle"></i></div>
+                                                <div class="event-detail">
+                                                    <div class="event-name">Cảnh báo nợ xấu (Mới)</div>
+                                                    <div class="event-loc">Nghệ An - Diễn Châu</div>
+                                                </div>
+                                                <div class="event-status bg-red-light text-red">Chú ý</div>
+                                            </li>
+                                            <li class="event-item">
+                                                <div class="event-time">10:55:12</div>
+                                                <div class="event-icon text-green"><i class="ph-fill ph-check-circle"></i></div>
+                                                <div class="event-detail">
+                                                    <div class="event-name">Giải ngân 120tr</div>
+                                                    <div class="event-loc">Nghệ An</div>
+                                                </div>
+                                                <div class="event-status bg-green-light text-green">Xong</div>
+                                            </li>
+                                            <li class="event-item">
+                                                <div class="event-time">10:54:05</div>
+                                                <div class="event-icon text-green"><i class="ph-fill ph-users-three"></i></div>
+                                                <div class="event-detail">
+                                                    <div class="event-name">Khách hàng vay lại</div>
+                                                    <div class="event-loc">Hà Tĩnh - Cẩm Xuyên</div>
+                                                </div>
+                                                <div class="event-status bg-green-light text-green">Vay lại</div>
+                                            </li>
+                                            <li class="event-item">
+                                                <div class="event-time">10:52:18</div>
+                                                <div class="event-icon text-green"><i class="ph-fill ph-check-circle"></i></div>
+                                                <div class="event-detail">
+                                                    <div class="event-name">Tất toán 15tr</div>
+                                                    <div class="event-loc">Hà Tĩnh</div>
+                                                </div>
+                                                <div class="event-status bg-green-light text-green">Tất toán</div>
+                                            </li>
+                                            <li class="event-item">
+                                                <div class="event-time">10:51:00</div>
+                                                <div class="event-icon text-green"><i class="ph-fill ph-thumbs-up"></i></div>
+                                                <div class="event-detail">
+                                                    <div class="event-name">Đánh giá 5 sao</div>
+                                                    <div class="event-loc">Nghệ An - Quỳ Châu</div>
+                                                </div>
+                                                <div class="event-status bg-green-light text-green">Feedback</div>
+                                            </li>
+                                            <li class="event-item">
+                                                <div class="event-time">10:50:22</div>
+                                                <div class="event-icon text-orange"><i class="ph-fill ph-phone-call"></i></div>
+                                                <div class="event-detail">
+                                                    <div class="event-name">Hẹn gọi lại sau 2h</div>
+                                                    <div class="event-loc">Thanh Hóa - Nga Sơn</div>
+                                                </div>
+                                                <div class="event-status bg-orange-light text-orange">Telesale</div>
+                                            </li>
+                                            <li class="event-item">
+                                                <div class="event-time">10:48:15</div>
+                                                <div class="event-icon text-green"><i class="ph-fill ph-check-square"></i></div>
+                                                <div class="event-detail">
+                                                    <div class="event-name">Hoàn tất thủ tục</div>
+                                                    <div class="event-loc">Hà Tĩnh - Can Lộc</div>
+                                                </div>
+                                                <div class="event-status bg-green-light text-green">Hoàn tất</div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Tab 2: Hiệu quả kinh doanh -->
+                <div id="tab-hieuqua" class="tab-pane">
+                    <header class="tab-header flex-between">
+                        <h1>Hiệu quả kinh doanh chiến dịch XKLD</h1>
+                        <div class="header-filters">
+                            <div class="filter-group">
+                                <label>Từ ngày</label>
+                                <input type="date" value="2025-05-01">
+                            </div>
+                            <div class="filter-group">
+                                <label>Đến ngày</label>
+                                <input type="date" value="2025-05-19">
+                            </div>
+                        </div>
+                    </header>
+                    <div class="tab-body rt-grid">
+                        <!-- Top metrics Row 1 -->
+                        <div class="rt-metrics">
+                            <div class="metric-card">
+                                <div class="metric-icon bg-green-light"><i class="ph-fill ph-coins"></i></div>
+                                <div class="metric-info">
+                                    <div class="metric-title">Doanh thu</div>
+                                    <div class="metric-value">34,68 <span class="unit">tỷ VND</span></div>
+                                    <div class="metric-trend text-green"><i class="ph-bold ph-caret-up"></i> 21,3% <span
+                                            class="trend-sub">vs cùng kỳ 18/05</span></div>
+                                </div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon bg-orange-light"><i class="ph-fill ph-money"></i></div>
+                                <div class="metric-info">
+                                    <div class="metric-title">Chi phí</div>
+                                    <div class="metric-value">17,83 <span class="unit">tỷ VND</span></div>
+                                    <div class="metric-trend text-red"><i class="ph-bold ph-caret-up"></i> 12,6% <span
+                                            class="trend-sub">vs cùng kỳ 18/05</span></div>
+                                </div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon bg-green-light"><i class="ph-fill ph-piggy-bank"></i></div>
+                                <div class="metric-info">
+                                    <div class="metric-title">Lợi nhuận</div>
+                                    <div class="metric-value">6,85 <span class="unit">tỷ VND</span></div>
+                                    <div class="metric-trend text-green"><i class="ph-bold ph-caret-up"></i> 19,6% <span
+                                            class="trend-sub">vs cùng kỳ 18/05</span></div>
+                                </div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon bg-yellow-light"><i class="ph-fill ph-medal"></i></div>
+                                <div class="metric-info">
+                                    <div class="metric-title">ROI</div>
+                                    <div class="metric-value">132,6%</div>
+                                    <div class="metric-trend text-green"><i class="ph-bold ph-caret-up"></i> 16,5 điểm %
+                                        <span class="trend-sub">vs cùng kỳ 18/05</span></div>
+                                </div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon bg-green-light"><i class="ph-fill ph-file-text"></i></div>
+                                <div class="metric-info">
+                                    <div class="metric-title">Doanh thu TB / Hợp đồng</div>
+                                    <div class="metric-value">17,82 <span class="unit">triệu VND</span></div>
+                                    <div class="metric-trend text-green"><i class="ph-bold ph-caret-up"></i> 8,7% <span
+                                            class="trend-sub">vs cùng kỳ 18/05</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Secondary Metrics Row 2 -->
+                        <div class="secondary-metrics">
+                            <div class="s-metric">
+                                <div class="s-title">EBIT</div>
+                                <div class="s-value">6,85 <span class="unit">tỷ VND</span></div>
+                                <div class="s-trend text-green"><i class="ph-bold ph-caret-up"></i> 19,6%</div>
+                            </div>
+                            <div class="s-metric">
+                                <div class="s-title">Biên EBIT</div>
+                                <div class="s-value">19,7%</div>
+                                <div class="s-trend text-green"><i class="ph-bold ph-caret-up"></i> 3,04%</div>
+                            </div>
+                            <div class="s-metric">
+                                <div class="s-title">Chi phí cố định</div>
+                                <div class="s-value">5,21 <span class="unit">tỷ VND</span></div>
+                                <div class="s-sub">29,2%</div>
+                            </div>
+                            <div class="s-metric">
+                                <div class="s-title">Chi phí biến đổi</div>
+                                <div class="s-value">12,62 <span class="unit">tỷ VND</span></div>
+                                <div class="s-sub">70,8%</div>
+                            </div>
+                            <div class="s-metric">
+                                <div class="s-title">Biên lợi nhuận</div>
+                                <div class="s-value">19,7%</div>
+                                <div class="s-trend text-green"><i class="ph-bold ph-caret-up"></i> 3,04%</div>
+                            </div>
+                            <div class="s-metric">
+                                <div class="s-title">Tăng trưởng LN</div>
+                                <div class="s-trend text-green"><i class="ph-bold ph-caret-up"></i> 19,6%</div>
+                            </div>
+                            <div class="s-metric">
+                                <div class="s-title">Lợi nhuận / Chi phí</div>
+                                <div class="s-value">0,38 <span class="unit">lần</span></div>
+                            </div>
+                            <div class="s-metric">
+                                <div class="s-title">Vốn đầu tư</div>
+                                <div class="s-value">5,18 <span class="unit">tỷ VND</span></div>
+                            </div>
+                            <div class="s-metric">
+                                <div class="s-title">Hợp đồng</div>
+                                <div class="s-value">1.946</div>
+                                <div class="s-trend text-green"><i class="ph-bold ph-caret-up"></i> 23,1%</div>
+                            </div>
+                            <div class="s-metric">
+                                <div class="s-title">TB / ngày</div>
+                                <div class="s-value">102,4 <span class="unit">triệu VND</span></div>
+                            </div>
+                        </div>
+                        <!-- Charts Grid -->
+                        <div class="hq-charts-grid">
+                            <div class="card">
+                                <div class="card-title">1. Phân bổ nguồn chi phí</div>
+                                <div class="chart-container"><canvas
+                                        id="hq-chart-chiphi"></canvas></div>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">2. Doanh thu & lợi nhuận theo tháng</div>
+                                <div class="chart-container"><canvas
+                                        id="hq-chart-dtlnthang"></canvas></div>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">3. Phân bổ các mức khoản vay</div>
+                                <div class="chart-container"><canvas
+                                        id="hq-chart-mucvay"></canvas></div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-title">4. Doanh thu trên mỗi hợp đồng theo tháng</div>
+                                <div class="chart-container"><canvas
+                                        id="hq-chart-dthdthang"></canvas></div>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">5. Tăng trưởng số hợp đồng và doanh thu</div>
+                                <div class="chart-container"><canvas
+                                        id="hq-chart-tangtruong"></canvas></div>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">6. Cấu trúc chi phí cố định / biến đổi</div>
+                                <div class="chart-container"><canvas
+                                        id="hq-chart-cautruc-cp"></canvas></div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-title">7. Cấu trúc EBIT (tỷ VND)</div>
+                                <div class="chart-container"><canvas id="hq-chart-ebit"></canvas>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">8. Top chi nhánh theo doanh thu</div>
+                                <div class="chart-container"><canvas
+                                        id="hq-chart-topdt"></canvas></div>
+                            </div>
+                            <div class="card">
+                                <div class="card-title flex-between">9. Top chi nhánh theo lợi nhuận <a href="#"
+                                        class="text-link">Xem tất cả chi nhánh ></a></div>
+                                <div class="chart-container"><canvas
+                                        id="hq-chart-topln"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Tab 3: Quản trị rủi ro -->
+                <div id="tab-ruiro" class="tab-pane">
+                    <header class="tab-header flex-between">
+                        <h1>Quản trị rủi ro chiến dịch XKLD</h1>
+                        <div class="header-filters">
+                            <div class="filter-group">
+                                <label>Từ ngày</label>
+                                <input type="date" value="2025-05-01">
+                            </div>
+                            <div class="filter-group">
+                                <label>Đến ngày</label>
+                                <input type="date" value="2025-05-19">
+                            </div>
+                        </div>
+                    </header>
+                    <div class="tab-body rt-grid">
+                        <!-- Top metrics -->
+                        <div class="rt-metrics">
+                            <div class="metric-card">
+                                <div class="metric-icon bg-red-light"><i class="ph-fill ph-warning"></i></div>
+                                <div class="metric-info">
+                                    <div class="metric-title">Nợ xấu 10+</div>
+                                    <div class="metric-value">8,6%</div>
+                                    <div class="metric-trend text-red"><i class="ph-bold ph-caret-up"></i> 1,2% <span
+                                            class="trend-sub">so với cùng kỳ</span></div>
+                                </div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon bg-orange-light"><i class="ph-fill ph-clock-circle"></i></div>
+                                <div class="metric-info">
+                                    <div class="metric-title">Nợ xấu 90+</div>
+                                    <div class="metric-value">4,2%</div>
+                                    <div class="metric-trend text-red"><i class="ph-bold ph-caret-up"></i> 0,7% <span
+                                            class="trend-sub">so với cùng kỳ</span></div>
+                                </div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon bg-yellow-light"><i class="ph-fill ph-calendar-blank"></i></div>
+                                <div class="metric-info">
+                                    <div class="metric-title">Nợ xấu 180+</div>
+                                    <div class="metric-value">2,6%</div>
+                                    <div class="metric-trend text-red"><i class="ph-bold ph-caret-up"></i> 0,4% <span
+                                            class="trend-sub">so với cùng kỳ</span></div>
+                                </div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon bg-yellow-light"><i class="ph-fill ph-calendar"></i></div>
+                                <div class="metric-info">
+                                    <div class="metric-title">Nợ xấu 360+</div>
+                                    <div class="metric-value">1,4%</div>
+                                    <div class="metric-trend text-green"><i class="ph-bold ph-caret-down"></i> 0,2%
+                                        <span class="trend-sub">so với cùng kỳ</span></div>
+                                </div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon bg-green-light"><i class="ph-fill ph-calendar-check"></i></div>
+                                <div class="metric-info">
+                                    <div class="metric-title">Nợ xấu >360</div>
+                                    <div class="metric-value">0,8%</div>
+                                    <div class="metric-trend text-green"><i class="ph-bold ph-caret-down"></i> 0,1%
+                                        <span class="trend-sub">so với cùng kỳ</span></div>
+                                </div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon bg-green-light"><i
+                                        class="ph-fill ph-currency-circle-dollar"></i></div>
+                                <div class="metric-info">
+                                    <div class="metric-title">Tỷ lệ thu hồi vốn</div>
+                                    <div class="metric-value">72,4%</div>
+                                    <div class="metric-trend text-green"><i class="ph-bold ph-caret-up"></i> 3,6% <span
+                                            class="trend-sub">so với cùng kỳ</span></div>
+                                </div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-icon bg-orange-light"><i class="ph-fill ph-trash"></i></div>
+                                <div class="metric-info">
+                                    <div class="metric-title">Tỷ lệ xóa nợ</div>
+                                    <div class="metric-value">1,9%</div>
+                                    <div class="metric-trend text-red"><i class="ph-bold ph-caret-up"></i> 0,3% <span
+                                            class="trend-sub">so với cùng kỳ</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="rr-grid-main">
+                            <!-- Heatmap -->
+                            <div class="card heatmap-card">
+                                <div class="card-title">1. Ma trận nợ xấu theo mức nợ và khoản vay</div>
+                                <div class="heatmap-container">
+                                    <table class="heatmap-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Mức khoản vay</th>
+                                                <th>10+</th>
+                                                <th>90+</th>
+                                                <th>180+</th>
+                                                <th>360+</th>
+                                                <th>>360</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    < 20 triệu</td>
+                                                <td class="bg-green">6,8%</td>
+                                                <td class="bg-green">3,2%</td>
+                                                <td class="bg-green">1,9%</td>
+                                                <td class="bg-green">1,1%</td>
+                                                <td class="bg-green">0,5%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>20-50 triệu</td>
+                                                <td class="bg-yellow">8,1%</td>
+                                                <td class="bg-yellow">4,1%</td>
+                                                <td class="bg-yellow">2,5%</td>
+                                                <td class="bg-yellow">1,4%</td>
+                                                <td class="bg-green">0,6%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>50-100 triệu</td>
+                                                <td class="bg-orange">10,2%</td>
+                                                <td class="bg-orange">5,3%</td>
+                                                <td class="bg-yellow">3,1%</td>
+                                                <td class="bg-yellow">1,7%</td>
+                                                <td class="bg-green">0,8%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>100-150 triệu</td>
+                                                <td class="bg-red">12,6%</td>
+                                                <td class="bg-orange">6,2%</td>
+                                                <td class="bg-orange">3,7%</td>
+                                                <td class="bg-yellow">1,9%</td>
+                                                <td class="bg-green">0,9%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>>150 triệu</td>
+                                                <td class="bg-red">15,4%</td>
+                                                <td class="bg-red">7,3%</td>
+                                                <td class="bg-orange">4,5%</td>
+                                                <td class="bg-yellow">2,2%</td>
+                                                <td class="bg-yellow">1,2%</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div class="heatmap-legend">
+                                        Mức độ rủi ro:
+                                        <span class="legend-color" style="background:#10b981"></span> Thấp (0-2%)
+                                        <span class="legend-color" style="background:#fcd34d"></span> Trung bình (2-5%)
+                                        <span class="legend-color" style="background:#f97316"></span> Cao (5-10%)
+                                        <span class="legend-color" style="background:#ef4444"></span> Rất cao (>10%)
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Radar -->
+                            <div class="card">
+                                <div class="card-title">2. Radar 5 nhóm nợ</div>
+                                <div class="chart-container"><canvas
+                                        id="rr-chart-radar"></canvas></div>
+                            </div>
+                            <!-- Donut -->
+                            <div class="card">
+                                <div class="card-title">3. Phân bổ nguyên nhân nợ xấu / trả chậm</div>
+                                <div class="chart-container"><canvas
+                                        id="rr-chart-nguyennhan"></canvas></div>
+                            </div>
+                        </div>
+                        <!-- Row 3: Charts 5 & 4 -->
+                        <div class="rr-middle-charts">
+                            <div class="card">
+                                <div class="card-title flex-between">5. Nợ xấu theo tỉnh thành / chi nhánh
+                                    <div class="toggle-group">
+                                        <button class="toggle-btn active">Tỉnh thành</button>
+                                        <button class="toggle-btn">Chi nhánh</button>
+                                    </div>
+                                </div>
+                                <div class="chart-container"><canvas
+                                        id="rr-chart-noxautinh"></canvas></div>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">4. Xu hướng nợ xấu và thu hồi theo tháng</div>
+                                <div class="chart-container"><canvas id="rr-chart-xuhuong"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="rr-grid-bottom">
+                            <div class="card">
+                                <div class="card-title">6. Nợ xấu theo kênh</div>
+                                <div class="chart-container"><canvas
+                                        id="rr-chart-noxaukenh"></canvas></div>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">7. Thu hồi vốn theo bucket nợ</div>
+                                <div class="chart-container"><canvas
+                                        id="rr-chart-thuhoi"></canvas></div>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">8. Tỷ lệ xóa nợ theo tháng</div>
+                                <div class="chart-container"><canvas
+                                        id="rr-chart-xoano"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Tab 4: Chân dung khách hàng -->
+                <div id="tab-chandung" class="tab-pane">
+                    <header class="tab-header flex-between">
+                        <div>
+                            <h1>Chân dung khách hàng <span class="badge-live">● LIVE</span></h1>
+                            <p class="subtitle">Phân tích tổng quan hành vi và đặc điểm khách hàng</p>
+                        </div>
+                        <div class="header-right">
+                            <div class="header-filters">
+                                <div class="filter-group">
+                                    <label>Từ ngày</label>
+                                    <input type="date" value="2025-05-01">
+                                </div>
+                                <div class="filter-group">
+                                    <label>Đến ngày</label>
+                                    <input type="date" value="2025-05-19">
+                                </div>
+                            </div>
+                            <div class="header-actions">
+                                <i class="ph-fill ph-bell"></i>
+                                <div class="avatar">AD</div>
+                            </div>
+                        </div>
+                    </header>
+                    <div class="tab-body rt-grid">
+                        <!-- Top Row: Profile & 4 Donuts -->
+                        <div class="cd-top-row">
+                            <!-- Profile Card -->
+                            <div class="profile-card">
+                                <div class="profile-header">Chân dung khách hàng tiêu biểu</div>
+                                <div class="profile-content">
+                                    <!-- Left Stats -->
+                                    <div class="profile-side left">
+                                        <div class="p-stat">
+                                            <i class="ph-fill ph-users text-yellow"></i>
+                                            <div>Tỷ lệ chuyển đổi<br><strong>12%</strong></div>
+                                        </div>
+                                        <div class="p-stat">
+                                            <i class="ph-fill ph-arrows-clockwise text-green"></i>
+                                            <div>Tỷ lệ quay vòng<br><strong>65%</strong></div>
+                                        </div>
+                                        <div class="p-stat">
+                                            <i class="ph-fill ph-coins text-yellow"></i>
+                                            <div>Thu nhập TB<br><strong>520K</strong></div>
+                                        </div>
+                                    </div>
+                                    <!-- Center Icon -->
+                                    <div class="profile-center">
+                                        <div class="user-avatar-main">
+                                            <i class="ph-fill ph-user"></i>
+                                        </div>
+                                    </div>
+                                    <!-- Right Stats -->
+                                    <div class="profile-side right">
+                                        <div class="p-stat">
+                                            <i class="ph-fill ph-gauge text-green"></i>
+                                            <div>Credit score<br><strong>680</strong></div>
+                                        </div>
+                                        <div class="p-stat">
+                                            <i class="ph-fill ph-shield-warning text-orange"></i>
+                                            <div>DPI<br><strong>48%</strong></div>
+                                        </div>
+                                        <div class="p-stat">
+                                            <i class="ph-fill ph-user-circle text-green"></i>
+                                            <div>Độ tuổi TB<br><strong>31</strong></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 4 Donuts -->
+                            <div class="card">
+                                <div class="card-title">Phân bổ khách hàng theo kênh bán hàng</div>
+                                <div class="chart-container"><canvas id="cd-chart-kenh"></canvas></div>
+                                <div class="legend-wrapper-fixed">
+                                    <div class="legend-list-grid" id="legend-kenh"></div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">Phân bổ khách hàng theo giới tính</div>
+                                <div class="chart-container"><canvas id="cd-chart-gioitinh"></canvas></div>
+                                <div class="legend-wrapper-fixed">
+                                    <div class="legend-list-grid" id="legend-gioitinh"></div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">Phân bổ khách hàng theo khu vực</div>
+                                <div class="chart-container"><canvas id="cd-chart-khuvuc"></canvas></div>
+                                <div class="legend-wrapper-fixed">
+                                    <div class="legend-list-grid" id="legend-khuvuc"></div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">Phân bổ tình trạng hồ sơ khách hàng</div>
+                                <div class="chart-container"><canvas id="cd-chart-tinhtrang"></canvas></div>
+                                <div class="legend-wrapper-fixed">
+                                    <div class="legend-list-grid" id="legend-tinhtrang"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Middle Row: 3 Charts (Chart 7 expanded) -->
+                        <div class="cd-middle-row">
+                            <div class="card">
+                                <div class="card-title">5. Phân bổ theo độ tuổi</div>
+                                <div class="chart-container"><canvas
+                                        id="cd-chart-dotuoi"></canvas></div>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">6. Phân bổ theo nghề nghiệp</div>
+                                <div class="chart-container"><canvas
+                                        id="cd-chart-nghenghiep"></canvas></div>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">7. Xu hướng khách hàng mới</div>
+                                <div class="chart-container"><canvas
+                                        id="cd-chart-xuhuong"></canvas></div>
+                            </div>
+                        </div>
+                        <!-- Bottom Row: Table & Chart 8 -->
+                        <div class="cd-bottom-row">
+                            <!-- Left: Top 10 Table (Scrollable) -->
+                            <div class="card table-card">
+                                <div class="card-title">Top 10 tỉnh/thành có nhiều khách hàng</div>
+                                <div class="table-scroll-container">
+                                    <table class="top-table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Tỉnh thành</th>
+                                                <th>Khách hàng</th>
+                                                <th>Tỷ lệ</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>1</td><td>Hà Nội</td><td>368.227</td><td>12,8%</td></tr>
+                                            <tr><td>2</td><td>TP. Hồ Chí Minh</td><td>254.632</td><td>8,8%</td></tr>
+                                            <tr><td>3</td><td>Đà Nẵng</td><td>148.563</td><td>5,5%</td></tr>
+                                            <tr><td>4</td><td>Bình Dương</td><td>124.250</td><td>4,2%</td></tr>
+                                            <tr><td>5</td><td>Hải Phòng</td><td>114.402</td><td>4,0%</td></tr>
+                                            <tr><td>6</td><td>Đồng Nai</td><td>92.115</td><td>3,2%</td></tr>
+                                            <tr><td>7</td><td>Cần Thơ</td><td>85.420</td><td>2,9%</td></tr>
+                                            <tr><td>8</td><td>Quảng Ninh</td><td>76.330</td><td>2,4%</td></tr>
+                                            <tr><td>9</td><td>Thanh Hóa</td><td>72.150</td><td>2,1%</td></tr>
+                                            <tr><td>10</td><td>Nghệ An</td><td>68.940</td><td>1,9%</td></tr>
+                                            <tr><td>11</td><td>Bắc Ninh</td><td>54.200</td><td>1,5%</td></tr>
+                                            <tr><td>12</td><td>Hải Dương</td><td>48.100</td><td>1,2%</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- Right: Chart 8 moved from Row 2 -->
+                            <div class="card">
+                                <div class="card-title">8. Phân bổ theo mức khoản vay</div>
+                                <div class="chart-container"><canvas
+                                        id="cd-chart-mucvay"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
